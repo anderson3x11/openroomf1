@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# FastF1 cache (pipeline output in data/ is versioned: the server builds the site from it)
+cache/
+
+# Front
+web/node_modules/
+web/.svelte-kit/
+web/build/
+
+# Secrets
+.env
+.env.*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+
+# Local assistant tooling, not part of the project
+.claude/
+.impeccable/
+CLAUDE.md

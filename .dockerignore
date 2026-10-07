@@ -1,0 +1,12 @@
+.git
+.venv
+cache
+cache-*
+web/node_modules
+web/build
+web/.svelte-kit
+**/__pycache__
+pipeline
+.claude
+.impeccable
+CLAUDE.md

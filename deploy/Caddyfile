@@ -1,0 +1,12 @@
+# Caddy inside the container: plain HTTP on port 80, Coolify's proxy handles the domain and HTTPS.
+:80 {
+	root * /srv
+	encode zstd gzip
+	try_files {path} {path}.html {path}/index.html
+	file_server
+
+	@immutable path /_app/immutable/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+	@fresh not path /_app/immutable/*
+	header @fresh Cache-Control "public, max-age=600"
+}
