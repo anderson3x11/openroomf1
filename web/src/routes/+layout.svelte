@@ -13,6 +13,13 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<meta property="og:title" content="OpenRoom F1" />
+	<meta property="og:description" content="Post-race Formula 1 analysis: pace, strategy, duels, replay and radio for every Grand Prix." />
+	<meta property="og:image" content="https://openroomf1.anderson3x11.dev/og.png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta property="og:type" content="website" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <header class="bar">
