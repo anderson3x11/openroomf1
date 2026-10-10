@@ -58,7 +58,7 @@
 		<Chart option={startOption(data.positions, results, race.logos)} height={results.length * 24 + 40} />
 	</Panel>
 
-	{#if data.meta.highlights}
+	{#if data.race && data.meta.highlights}
 		<Panel title="Race highlights" desc="Official highlights on the Formula 1 YouTube channel.">
 			<Highlights
 				id={data.meta.highlights}
@@ -76,12 +76,14 @@
 		<EventsList {events} />
 	</Panel>
 
-	<Panel title="Championship after the GP" wide desc="Updated standings and points scored at this Grand Prix.">
-		<div class="split two">
-			<StandingsTable rows={data.standings.drivers} logos={race.logos} label="DRIVER" />
-			<StandingsTable rows={data.standings.teams} logos={race.logos} label="TEAM" />
-		</div>
-	</Panel>
+	{#if data.standings}
+		<Panel title="Championship after the GP" wide desc="Updated standings and points scored at this Grand Prix, sprint included.">
+			<div class="split two">
+				<StandingsTable rows={data.standings.drivers} logos={race.logos} label="DRIVER" />
+				<StandingsTable rows={data.standings.teams} logos={race.logos} label="TEAM" />
+			</div>
+		</Panel>
+	{/if}
 </div>
 
 <style>

@@ -23,6 +23,7 @@ from pipeline.compute.laptimes import compute_laptimes
 from pipeline.compute.overtakes import compute_overtakes
 from pipeline.compute.pitstops import compute_pitstops
 from pipeline.compute.positions import compute_positions
+from pipeline.compute.quali import compute_quali, compute_quali_laps
 from pipeline.compute.radios import compute_radios, session_to_utc
 from pipeline.compute.results import compute_results
 from pipeline.compute.speeds import compute_speeds
@@ -59,13 +60,27 @@ def latest_round(schedule: pd.DataFrame, today: date) -> int | None:
     return None if held.empty else int(held["RoundNumber"].max())
 
 
+# FastF1 session name -> data folder and URL segment, in weekend order.
+SESSIONS = {
+    "Sprint Qualifying": "sprint-quali",
+    "Sprint Shootout": "sprint-quali",  # 2023 name of the sprint qualifying
+    "Sprint": "sprint",
+    "Qualifying": "quali",
+    "Race": "race",
+}
+
+
+def event_sessions(event) -> list[tuple[str, str]]:
+    """(folder, FastF1 name) of the sessions we export, in the order they were held."""
+    names = [event.get(f"Session{i}") for i in range(1, 6)]
+    return [(SESSIONS[n], n) for n in names if n in SESSIONS]
+
+
 def run(args: argparse.Namespace) -> None:
     # Imported here so the CLI and its tests do not pay for the FastF1 import.
-    from pipeline.fetch.fastf1_source import load_race, purge_cache
+    from pipeline.fetch.fastf1_source import load_session, purge_cache
     from pipeline.fetch.jolpica import FLAGS, load_circuit, load_standings
-    from pipeline.fetch.livetiming import load_feed
     from pipeline.fetch.logos import fetch_logos
-    from pipeline.fetch.openf1 import load_team_radio
     from pipeline.fetch.youtube import fetch_thumbnail, find_highlights
 
     if args.latest:
@@ -78,8 +93,31 @@ def run(args: argparse.Namespace) -> None:
             return
         print(f"Latest race: {args.season} round {args.round}")
 
-    session = load_race(args.season, args.round, args.cache_dir)
-    event = session.event
+    # The race is required: without it nothing is written. Other sessions are a bonus.
+    race = load_session(args.season, args.round, "Race", args.cache_dir, telemetry=True)
+    event = race.event
+    results = compute_results(race.results)
+    fetch_logos(
+        args.season, {r["tid"] for r in results}, args.data_dir / str(args.season) / "logos"
+    )
+    standings = load_standings(args.season, args.round)
+    files = race_files(race, "race", args.season, standings)
+    done = {"race"}
+    for folder, name in event_sessions(event):
+        if folder == "race":
+            continue
+        try:
+            session = load_session(
+                args.season, args.round, name, args.cache_dir, telemetry=folder == "sprint"
+            )
+            if folder == "sprint":
+                files |= race_files(session, folder, args.season)
+            else:
+                files |= quali_files(session, folder)
+            done.add(folder)
+        except Exception as e:  # FastF1 raises many kinds, and the race must not wait on them
+            print(f"WARNING: {name} skipped: {e!r}")
+
     meta = {
         "season": args.season,
         "round": args.round,
@@ -91,48 +129,11 @@ def run(args: argparse.Namespace) -> None:
         "flag": FLAGS.get(event["Country"]),
         "location": event["Location"],
         "date": event["EventDate"].strftime("%Y-%m-%d"),
-        "sessions": ["race"],
+        "sessions": [f for f, _ in event_sessions(event) if f in done],
         **load_circuit(args.season, args.round),
         "highlights": find_highlights(args.season, args.round, event["EventName"]),
     }
-    results = compute_results(session.results)
-    fetch_logos(
-        args.season, {r["tid"] for r in results}, args.data_dir / str(args.season) / "logos"
-    )
-    laps = session.laps
-    neutral = neutralized_laps(laps)  # timeline only, read on the leader's laps
-    standings = load_standings(args.season, args.round)
-    messages = session.race_control_messages
-    radios = load_team_radio(args.season, session.date.date())
-    overtakes = compute_overtakes(load_feed(session.api_path, "OvertakeSeries"), results)
-    pit_feed = load_feed(session.api_path, "PitStopSeries")
-    circuit, replay = circuit_and_replay(session, results)
-    # t0_date (exact, needs telemetry) turns session time into UTC; race control as a fallback.
-    clock = session.t0_date if session.t0_date is not None else session_to_utc(messages, laps)
-    radio_list = compute_radios(radios, laps, results, clock)
-    gp_dir = write_gp(
-        args.data_dir,
-        meta,
-        {
-            "race/results.json": results,
-            "race/positions.json": compute_positions(laps, session.results),
-            "race/gaps.json": compute_gaps(laps),
-            "race/strategy.json": compute_strategy(laps),
-            "race/pitstops.json": compute_pitstops(laps, pit_feed, results),
-            "race/summary.json": {"fastest": fastest_lap(laps), "overtakes": overtakes},
-            "race/circuit.json": circuit,
-            "race/replay.json": replay,
-            "race/laptimes.json": compute_laptimes(laps),
-            "race/laps.json": compute_lap_matrix(laps),
-            "race/racetrace.json": compute_race_trace(laps),
-            "race/degradation.json": compute_degradation(laps),
-            "race/speeds.json": compute_speeds(laps),
-            "race/weather.json": compute_weather(session.weather_data, laps),
-            "race/events.json": compute_events(messages, neutral),
-            "race/radios.json": radio_list,
-            "race/standings.json": compute_standings(**standings, results=results),
-        },
-    )
+    gp_dir = write_gp(args.data_dir, meta, files)
 
     if meta["highlights"]:
         fetch_thumbnail(meta["highlights"], gp_dir / "thumb.jpg")
@@ -143,6 +144,54 @@ def run(args: argparse.Namespace) -> None:
         print("WARNING: over budget, review resampling")
     if not args.keep_cache:
         purge_cache(args.cache_dir)
+
+
+def race_files(session, folder: str, season: int, standings: dict | None = None) -> dict:
+    """Files of a race or a sprint, under FOLDER/. Standings only after the race."""
+    from pipeline.fetch.livetiming import load_feed
+    from pipeline.fetch.openf1 import load_team_radio
+
+    results = compute_results(session.results)
+    laps = session.laps
+    neutral = neutralized_laps(laps)  # timeline only, read on the leader's laps
+    messages = session.race_control_messages
+    radios = load_team_radio(season, session.date.date(), session.name)
+    overtakes = compute_overtakes(load_feed(session.api_path, "OvertakeSeries"), results)
+    pit_feed = load_feed(session.api_path, "PitStopSeries")
+    circuit, replay = circuit_and_replay(session, results)
+    # t0_date (exact, needs telemetry) turns session time into UTC; race control as a fallback.
+    clock = session.t0_date if session.t0_date is not None else session_to_utc(messages, laps)
+    files = {
+        "results": results,
+        "positions": compute_positions(laps, session.results),
+        "gaps": compute_gaps(laps),
+        "strategy": compute_strategy(laps),
+        "pitstops": compute_pitstops(laps, pit_feed, results),
+        "summary": {"fastest": fastest_lap(laps), "overtakes": overtakes},
+        "circuit": circuit,
+        "replay": replay,
+        "laptimes": compute_laptimes(laps),
+        "laps": compute_lap_matrix(laps),
+        "racetrace": compute_race_trace(laps),
+        "degradation": compute_degradation(laps),
+        "speeds": compute_speeds(laps),
+        "weather": compute_weather(session.weather_data, laps),
+        "events": compute_events(messages, neutral),
+        "radios": compute_radios(radios, laps, results, clock),
+    }
+    if standings:
+        files["standings"] = compute_standings(**standings, results=results)
+    return {f"{folder}/{name}.json": obj for name, obj in files.items()}
+
+
+def quali_files(session, folder: str) -> dict:
+    """Files of a qualifying or a sprint qualifying, under FOLDER/."""
+    parts = list(session.laps.split_qualifying_sessions())
+    return {
+        f"{folder}/results.json": compute_quali(parts, session.results),
+        f"{folder}/laps.json": compute_quali_laps(parts),
+        f"{folder}/speeds.json": compute_speeds(session.laps),
+    }
 
 
 def outline_lap_pos(laps):

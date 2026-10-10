@@ -3,7 +3,7 @@ from datetime import date
 import pandas as pd
 import pytest
 
-from pipeline.cli import latest_round, parse_args
+from pipeline.cli import event_sessions, latest_round, parse_args
 
 
 def test_run_args():
@@ -28,3 +28,17 @@ def test_latest_round():
     assert latest_round(schedule, date(2026, 3, 1)) is None
     assert latest_round(schedule, date(2026, 3, 15)) == 2  # race day itself counts
     assert latest_round(schedule, date(2026, 12, 1)) == 3
+
+
+def test_event_sessions():
+    sprint = {"Session1": "Practice 1", "Session2": "Sprint Qualifying", "Session3": "Sprint"}
+    sprint |= {"Session4": "Qualifying", "Session5": "Race"}
+    assert [f for f, _ in event_sessions(pd.Series(sprint))] == [
+        "sprint-quali",
+        "sprint",
+        "quali",
+        "race",
+    ]
+    classic = {f"Session{i}": f"Practice {i}" for i in (1, 2, 3)}
+    classic |= {"Session4": "Qualifying", "Session5": "Race"}
+    assert event_sessions(pd.Series(classic)) == [("quali", "Qualifying"), ("race", "Race")]

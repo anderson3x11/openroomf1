@@ -1,3 +1,5 @@
+import type { Session } from '#lib/types.ts';
+
 /** +3, -2, 0. Empty when unknown. */
 export const signed = (n: number | null) => (n === null ? '' : n > 0 ? `+${n}` : String(n));
 
@@ -49,3 +51,12 @@ export const hostCountry = (gp: { host?: string | null; country: string }) => {
 	const host = gp.host ?? gp.country;
 	return COUNTRY_NAMES[host] ?? host;
 };
+
+/** Sessions of a GP as shown on the site, and their URL segment ('' for the race). */
+export const SESSION_LABELS: Record<Session, string> = {
+	'sprint-quali': 'Sprint quali',
+	sprint: 'Sprint',
+	quali: 'Qualifying',
+	race: 'Race'
+};
+export const sessionPath = (s: Session) => (s === 'race' ? '' : `/${s}`);

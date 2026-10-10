@@ -45,6 +45,7 @@ def write_gp(data_dir: Path, meta: dict, files: dict[str, object]) -> Path:
                 "circuit",
                 "host",
                 "flag",
+                "sessions",
             )
         }
     ]

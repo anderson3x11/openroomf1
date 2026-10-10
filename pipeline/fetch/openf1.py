@@ -18,19 +18,19 @@ def _get(path: str) -> list[dict]:
         return json.loads(r.read())
 
 
-def load_team_radio(season: int, race_day: date) -> pd.DataFrame:
-    """Radios of the race held on race_day. OpenF1 and FastF1 may name events differently
-    (round 16 of 2026: "Kuala Lumpur" vs "Bahrain"), so the session is matched by date."""
+def load_team_radio(season: int, day: date, session_name: str = "Race") -> pd.DataFrame:
+    """Radios of the session ("Race" or "Sprint") held on day. OpenF1 and FastF1 may name
+    events differently (round 16 of 2026: "Kuala Lumpur" vs "Bahrain"): matched by date."""
     try:
-        sessions = _get(f"sessions?year={season}&session_name=Race")
+        sessions = _get(f"sessions?year={season}&session_name={session_name}")
         key = next(
             s["session_key"]
             for s in sessions
-            if s["date_start"][:10] == race_day.isoformat() and not s.get("is_cancelled")
+            if s["date_start"][:10] == day.isoformat() and not s.get("is_cancelled")
         )
         radios = pd.DataFrame(_get(f"team_radio?session_key={key}"))
     except urllib.error.HTTPError as e:
-        if e.code != 404:  # 404 = OpenF1 has no radio for this race (early 2026 rounds)
+        if e.code != 404:  # 404 = OpenF1 has no radio for this session (early 2026 rounds)
             print(f"WARNING: no team radio: {e!r}")
         return pd.DataFrame(columns=["driver_number", "date", "recording_url"])
     except (OSError, StopIteration, ValueError) as e:

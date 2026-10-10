@@ -13,7 +13,7 @@
 	let replay = $state<Replay | null>(null);
 	let failed = $state(false);
 	$effect(() => {
-		const url = `/${data.meta.season}/${data.meta.slug}/replay.json`;
+		const url = `/${data.meta.season}/${data.meta.slug}${data.segment}/replay.json`;
 		replay = null;
 		fetch(url)
 			.then((r) => r.json())

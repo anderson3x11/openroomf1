@@ -35,7 +35,7 @@
 		}
 	});
 
-	const base = $derived(`/${data.meta.season}/${data.meta.slug}`);
+	const base = $derived(`/${data.meta.season}/${data.meta.slug}${data.segment}`);
 	const tabs = $derived([
 		{ href: base, label: 'Overview' },
 		{ href: `${base}/pace`, label: 'Pace' },
@@ -46,7 +46,9 @@
 	]);
 </script>
 
-<svelte:head><title>{data.meta.name} {data.meta.season} | OpenRoom F1</title></svelte:head>
+<svelte:head
+	><title>{data.meta.name} {data.meta.season}{data.segment ? ' sprint' : ''} | OpenRoom F1</title></svelte:head
+>
 
 <main>
 	<GpHeader meta={data.meta} season={data.season} laps={data.positions.laps} circuit={data.circuit}

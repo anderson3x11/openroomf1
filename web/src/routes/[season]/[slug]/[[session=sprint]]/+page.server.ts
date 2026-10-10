@@ -4,13 +4,16 @@ import type { Standings, Summary } from '#lib/types.ts';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
+	// Standings and highlights belong to the race, not to the sprint.
+	const race = !params.session;
 	const [standings, summary, hasThumb] = await Promise.all([
-		raceData<Standings>(params, 'standings'),
+		race ? raceData<Standings>(params, 'standings') : null,
 		raceData<Summary>(params, 'summary'),
-		access(dataPath(params.season, params.slug, 'thumb.jpg')).then(
+		race &&
+			access(dataPath(params.season, params.slug, 'thumb.jpg')).then(
 			() => true,
 			() => false
 		)
 	]);
-	return { standings, summary, hasThumb };
+	return { standings, summary, hasThumb, race };
 };

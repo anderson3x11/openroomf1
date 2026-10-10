@@ -1,5 +1,5 @@
 // Global page filters. Pure helpers, applied to the race data before building charts and tables.
-import type { LapTimes, PitStop, RaceEvents, ResultRow, Stint } from '#lib/types.ts';
+import type { Driver, LapTimes, PitStop, RaceEvents, Stint } from '#lib/types.ts';
 
 export interface Filters {
 	drivers: Set<string>;
@@ -9,7 +9,7 @@ export interface Filters {
 
 export const inLaps = (lap: number, [from, to]: [number, number]) => lap >= from && lap <= to;
 
-export function filterResults(results: ResultRow[], f: Filters) {
+export function filterResults<T extends Driver>(results: T[], f: Filters) {
 	return results.filter((r) => f.drivers.has(r.drv));
 }
 

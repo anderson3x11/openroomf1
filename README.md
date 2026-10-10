@@ -11,6 +11,8 @@ After each Grand Prix, a Python pipeline fetches the race data, computes the sta
 - **Replay**: every car on the track map, with the running order, tyres and gaps.
 - **Radio**: team radios placed on the driver's lap.
 
+Sprints get the same tabs. Qualifying and sprint qualifying get their own: classification by segment with the knockouts, every flying lap against session time, best sectors and ideal lap.
+
 Global filters (drivers, teams, lap range, compound) apply to every tab. Light and dark themes. Seasons 2025 and 2026.
 
 Everything is computed ahead of time: the browser only reads pre-rendered pages, with no database and no calls to the data sources.

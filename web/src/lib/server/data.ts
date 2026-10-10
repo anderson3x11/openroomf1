@@ -43,6 +43,10 @@ export async function listSeasons(): Promise<number[]> {
 		.sort((a, b) => b - a);
 }
 
-/** race/NAME.json of a GP, for the route params of a GP page. */
-export const raceData = <T,>(params: { season: string; slug: string }, name: string) =>
-	readData<T>(params.season, params.slug, 'race', `${name}.json`);
+/** SESSION/NAME.json of a GP: SESSION is a folder of the GP (race, sprint, quali, sprint-quali). */
+export const sessionData = <T,>(params: { season: string; slug: string }, session: string, name: string) =>
+	readData<T>(params.season, params.slug, session, `${name}.json`);
+
+/** NAME.json of the race, or of the sprint on /sprint pages (optional [[session]] route param). */
+export const raceData = <T,>(params: { season: string; slug: string; session?: string }, name: string) =>
+	sessionData<T>(params, params.session ?? 'race', name);

@@ -9,6 +9,18 @@ def int_or_none(value) -> int | None:
     return None if pd.isna(value) else int(value)
 
 
+def identity(r) -> dict:
+    """Driver and team fields shared by race and qualifying results (a results row)."""
+    return {
+        "drv": r.Abbreviation,
+        "num": str(r.DriverNumber),
+        "name": r.FullName,
+        "team": r.TeamName,
+        "tid": team_id(r.TeamName),
+        "color": f"#{r.TeamColor}" if isinstance(r.TeamColor, str) else None,
+    }
+
+
 def compute_results(results: pd.DataFrame) -> list[dict]:
     rows = []
     for r in results.sort_values("Position").itertuples():
@@ -17,12 +29,7 @@ def compute_results(results: pd.DataFrame) -> list[dict]:
         pos = int_or_none(r.Position)
         rows.append(
             {
-                "drv": r.Abbreviation,
-                "num": str(r.DriverNumber),
-                "name": r.FullName,
-                "team": r.TeamName,
-                "tid": team_id(r.TeamName),
-                "color": f"#{r.TeamColor}" if isinstance(r.TeamColor, str) else None,
+                **identity(r),
                 "grid": grid,
                 "pos": pos,
                 "cls": str(r.ClassifiedPosition),

@@ -14,24 +14,32 @@ export interface GpSummary {
 	circuit?: string | null; // "Circuit de Spa-Francorchamps"
 	host?: string | null; // country of the circuit: Malaysia for the 2026 Bahrain GP
 	flag?: string | null; // ISO 3166 alpha-2 of the host country
+	sessions?: Session[]; // weekend order, missing for GPs exported before sprints and qualifying
 }
+
+/** A folder of the GP and the URL segment of its pages ('' for the race). */
+export type Session = 'sprint-quali' | 'sprint' | 'quali' | 'race';
 
 /** data/SEASON/SLUG/meta.json */
 export interface GpMeta extends GpSummary {
 	season: number;
 	location: string;
-	sessions: string[];
+	sessions: Session[];
 	highlights?: string | null; // YouTube video id of the official race highlights
 }
 
-/** race/results.json, sorted by finishing position */
-export interface ResultRow {
+/** Driver and team, common to race and qualifying results */
+export interface Driver {
 	drv: string; // three-letter code
 	num: string;
 	name: string;
 	team: string;
 	tid: string; // team slug, key of the logo file
 	color: string | null; // #RRGGBB
+}
+
+/** race/results.json (and sprint/), sorted by finishing position */
+export interface ResultRow extends Driver {
 	grid: number | null; // null = pit lane start
 	pos: number | null;
 	cls: string; // classified position, or R / D / W ...
@@ -177,4 +185,16 @@ export interface Speeds {
 	s: (number | null)[]; // best sector times, s
 	ideal: number | null; // sum of best sectors
 	best: number | null; // best lap
+}
+
+/** quali/results.json (and sprint-quali/), in classification order */
+export interface QualiRow extends Driver {
+	pos: number;
+	q: (number | null)[]; // best valid flying lap in Q1, Q2, Q3, s; null = no time
+}
+
+/** quali/laps.json: flying laps, times in seconds of session time */
+export interface QualiLaps {
+	segs: [number, number, number][]; // [segment 1-3, start, end]
+	laps: Record<string, [number, number, number, string, number][]>; // [segment, lap end, lap time, compound, deleted 0/1]
 }

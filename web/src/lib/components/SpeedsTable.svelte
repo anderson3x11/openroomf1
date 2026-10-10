@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { formatLap } from '#lib/stats.ts';
-	import type { ResultRow, Speeds } from '#lib/types.ts';
+	import type { Driver, Speeds } from '#lib/types.ts';
 	import TeamMark from './TeamMark.svelte';
 
 	let {
 		speeds,
 		results,
 		logos
-	}: { speeds: Record<string, Speeds>; results: ResultRow[]; logos: Record<string, string> } = $props();
+	}: { speeds: Record<string, Speeds>; results: Driver[]; logos: Record<string, string> } = $props();
 
 	const rows = $derived(
 		results

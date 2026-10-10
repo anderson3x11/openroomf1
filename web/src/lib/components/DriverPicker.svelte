@@ -1,14 +1,14 @@
 <script lang="ts">
 	// Per chart driver selection, on top of the global filters. It stands in for the chart
 	// legend: team color, logo and code for every line.
-	import type { ResultRow } from '#lib/types.ts';
+	import type { Driver } from '#lib/types.ts';
 	import TeamMark from './TeamMark.svelte';
 
 	let {
 		results,
 		logos,
 		hidden = $bindable()
-	}: { results: ResultRow[]; logos: Record<string, string>; hidden: Set<string> } = $props();
+	}: { results: Driver[]; logos: Record<string, string>; hidden: Set<string> } = $props();
 
 	const all = $derived(results.map((r) => r.drv));
 	// Sets are replaced, not mutated, so that Svelte sees the change.

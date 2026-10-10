@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Filters } from '#lib/filters.ts';
 	import { tyreColor } from '#lib/tyres.ts';
-	import type { RaceEvents, ResultRow } from '#lib/types.ts';
+	import type { Driver, RaceEvents } from '#lib/types.ts';
 	import LapStrip from './LapStrip.svelte';
 	import TeamMark from './TeamMark.svelte';
 
@@ -11,15 +11,16 @@
 		logos,
 		compounds,
 		totalLaps,
-		neutral
+		neutral = []
 	}: {
 		filters: Filters;
-		results: ResultRow[];
+		results: Driver[];
 		logos: Record<string, string>;
 		compounds: string[];
-		totalLaps: number;
-		neutral: RaceEvents['neutral'];
+		totalLaps?: number; // no lap range filter without it (qualifying)
+		neutral?: RaceEvents['neutral'];
 	} = $props();
+	const lastLap = $derived(totalLaps ?? filters.laps[1]);
 
 	let open = $state(false);
 
@@ -54,19 +55,19 @@
 
 	function setLap(index: 0 | 1, value: number) {
 		const laps: [number, number] = [...filters.laps];
-		laps[index] = Math.min(Math.max(Math.round(value) || 1, 1), totalLaps);
+		laps[index] = Math.min(Math.max(Math.round(value) || 1, 1), lastLap);
 		if (laps[0] > laps[1]) laps[1 - index] = laps[index];
 		filters = { ...filters, laps };
 	}
 
 	function reset() {
-		filters = { drivers: new Set(allDrivers), laps: [1, totalLaps], compounds: new Set(compounds) };
+		filters = { drivers: new Set(allDrivers), laps: [1, lastLap], compounds: new Set(compounds) };
 	}
 
 	const isDefault = $derived(
 		filters.drivers.size === allDrivers.length &&
 			filters.laps[0] === 1 &&
-			filters.laps[1] === totalLaps &&
+			filters.laps[1] === lastLap &&
 			filters.compounds.size === compounds.length
 	);
 </script>
@@ -78,7 +79,7 @@
 		</button>
 		<span class="label state">
 			<b>{filters.drivers.size}/{allDrivers.length}</b> DRIVERS
-			<span aria-hidden="true">/</span> LAPS <b>{filters.laps[0]}-{filters.laps[1]}</b>
+			{#if totalLaps}<span aria-hidden="true">/</span> LAPS <b>{filters.laps[0]}-{filters.laps[1]}</b>{/if}
 			<span aria-hidden="true">/</span> TYRES <b>{filters.compounds.size}/{compounds.length}</b>
 		</span>
 		{#if !isDefault}
@@ -122,34 +123,36 @@
 					</div>
 				{/each}
 			</div>
-			<div class="row">
-				<span class="label title">LAPS</span>
-				<label class="label"
-					>FROM <input
-						type="number"
-						min="1"
-						max={totalLaps}
-						value={filters.laps[0]}
-						onchange={(e) => setLap(0, e.currentTarget.valueAsNumber)}
-					/></label
-				>
-				<label class="label"
-					>TO <input
-						type="number"
-						min="1"
-						max={totalLaps}
-						value={filters.laps[1]}
-						onchange={(e) => setLap(1, e.currentTarget.valueAsNumber)}
-					/></label
-				>
-				<button class="label link" onclick={() => (filters = { ...filters, laps: [1, totalLaps] })}
-					>[ ALL LAPS ]</button
-				>
-			</div>
-			<div class="laps">
-				<LapStrip bind:laps={() => filters.laps, (laps) => (filters = { ...filters, laps })} total={totalLaps} {neutral} />
-				<span class="hint">Drag across laps to pick a range, click one lap to isolate it. Yellow: SC or VSC.</span>
-			</div>
+			{#if totalLaps}
+				<div class="row">
+					<span class="label title">LAPS</span>
+					<label class="label"
+						>FROM <input
+							type="number"
+							min="1"
+							max={totalLaps}
+							value={filters.laps[0]}
+							onchange={(e) => setLap(0, e.currentTarget.valueAsNumber)}
+						/></label
+					>
+					<label class="label"
+						>TO <input
+							type="number"
+							min="1"
+							max={totalLaps}
+							value={filters.laps[1]}
+							onchange={(e) => setLap(1, e.currentTarget.valueAsNumber)}
+						/></label
+					>
+					<button class="label link" onclick={() => (filters = { ...filters, laps: [1, totalLaps] })}
+						>[ ALL LAPS ]</button
+					>
+				</div>
+				<div class="laps">
+					<LapStrip bind:laps={() => filters.laps, (laps) => (filters = { ...filters, laps })} total={totalLaps} {neutral} />
+					<span class="hint">Drag across laps to pick a range, click one lap to isolate it. Yellow: SC or VSC.</span>
+				</div>
+			{/if}
 			<div class="row">
 				<span class="label title">TYRES</span>
 				{#each compounds as c (c)}

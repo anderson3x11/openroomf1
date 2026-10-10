@@ -89,3 +89,21 @@ def weather() -> pd.DataFrame:
     df = _read("weather")
     df["Time"] = pd.to_timedelta(df["Time"], unit="s")
     return df
+
+
+@pytest.fixture
+def quali_parts() -> list[pd.DataFrame]:
+    """Bahrain 2026 qualifying, reduced to VER (pole), ANT (a deleted lap), LAW (out in Q2),
+    COL (in Q2 without a time) and PER (out in Q1). One frame per segment, like
+    Laps.split_qualifying_sessions(); the CSV keeps the segment in column Q."""
+    df = pd.read_csv(FIXTURES / "bahrain_2026_quali_laps.csv")
+    for col in ("Time", "LapStartTime", "LapTime", "PitInTime", "PitOutTime"):
+        df[col] = pd.to_timedelta(df[col], unit="s")
+    for col in ("Sector1Time", "Sector2Time", "Sector3Time"):
+        df[col] = pd.to_timedelta(df[col], unit="s")
+    return [df[df["Q"] == q].drop(columns="Q") for q in (1, 2, 3)]
+
+
+@pytest.fixture
+def quali_results() -> pd.DataFrame:
+    return pd.read_csv(FIXTURES / "bahrain_2026_quali_results.csv", dtype={"TeamColor": str})
