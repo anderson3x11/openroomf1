@@ -1,6 +1,6 @@
 // Run with: node --experimental-strip-types src/lib/telemetry.test.ts
 import assert from 'node:assert/strict';
-import { delta, distinctColors, miniSectors } from './telemetry.ts';
+import { delta, distinctColors, miniSectors, smooth } from './telemetry.ts';
 import type { Driver, TelemetryLap } from './types.ts';
 
 const lap = (t: number[]) => ({ t }) as TelemetryLap;
@@ -22,4 +22,6 @@ assert.deepEqual(distinctColors([drv('VER', 'RB', '#3671C6'), drv('LAW', 'RB', '
 	LAW: '#FFFFFF',
 	LEC: '#B07CFF'
 });
+assert.deepEqual(smooth([0, 0, 3, 0, 0], 1), [0, 1, 1, 1, 0]); // a GPS spike flattened
+assert.deepEqual(smooth([1, 2, 3], 1), [1.5, 2, 2.5]); // shorter window at the ends
 console.log('telemetry ok');

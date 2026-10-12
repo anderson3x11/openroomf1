@@ -31,3 +31,14 @@ export function distinctColors(drivers: Driver[]): Record<string, string> {
 	}
 	return out;
 }
+
+/** Moving average over `half` points on each side: GPS positions make the track map wobble. */
+export function smooth(values: number[], half: number): number[] {
+	return values.map((_, i) => {
+		const from = Math.max(0, i - half);
+		const to = Math.min(values.length - 1, i + half);
+		let sum = 0;
+		for (let j = from; j <= to; j++) sum += values[j];
+		return sum / (to - from + 1);
+	});
+}

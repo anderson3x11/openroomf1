@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { miniSectors } from '#lib/telemetry.ts';
+	import { miniSectors, smooth } from '#lib/telemetry.ts';
 	import type { Telemetry } from '#lib/types.ts';
 
 	let {
@@ -11,20 +11,24 @@
 
 	const laps = $derived(drivers.map((d) => tel.laps[d]));
 	const sectors = $derived(laps.length ? miniSectors(laps, count) : []);
+	// Smoothed over about 50 m: the raw positions come from GPS, every 10 m.
+	const xs = $derived(smooth(tel.x, 2));
+	const ys = $derived(smooth(tel.y, 2));
 	const points = (from: number, to: number) =>
-		tel.x
+		xs
 			.slice(from, to + 1)
-			.map((x, i) => `${x},${tel.y[from + i]}`)
+			.map((x, i) => `${x.toFixed(1)},${ys[from + i].toFixed(1)}`)
 			.join(' ');
 	// A short bar across the track at the start of each mini-sector, perpendicular to it.
 	const ticks = $derived(
 		sectors.map(({ from }) => {
-			const a = Math.max(from - 1, 0);
-			const b = Math.min(from + 1, tel.x.length - 1);
-			const dx = tel.x[b] - tel.x[a];
-			const dy = tel.y[b] - tel.y[a];
-			const k = 11 / (Math.hypot(dx, dy) || 1); // half length, a bit wider than the track
-			return { x: tel.x[from], y: tel.y[from], nx: -dy * k, ny: dx * k };
+			// Direction over 60 m around the boundary: steadier than two neighbouring points.
+			const a = Math.max(from - 3, 0);
+			const b = Math.min(from + 3, xs.length - 1);
+			const dx = xs[b] - xs[a];
+			const dy = ys[b] - ys[a];
+			const k = 8 / (Math.hypot(dx, dy) || 1); // half length, just wider than the track
+			return { x: xs[from], y: ys[from], nx: -dy * k, ny: dx * k };
 		})
 	);
 	const won = $derived(drivers.map((d, i) => ({ d, n: sectors.filter((s) => s.best === i).length })));
@@ -32,7 +36,7 @@
 
 <div class="map">
 	<svg viewBox="-20 -20 {tel.w + 40} {tel.h + 40}" role="img" aria-label="Fastest driver in each mini-sector">
-		<polyline class="track" points={points(0, tel.x.length - 1)} />
+		<polyline class="track" points={points(0, xs.length - 1)} />
 		{#each sectors as s, k (k)}
 			<polyline class="sector" points={points(s.from, s.to)} style:stroke={colors[drivers[s.best]]} />
 		{/each}
@@ -58,19 +62,21 @@
 	}
 	polyline {
 		fill: none;
-		stroke-linecap: round;
 		stroke-linejoin: round;
 	}
 	.track {
 		stroke: var(--rule);
-		stroke-width: 26;
+		stroke-width: 14;
+		stroke-linecap: round;
 	}
+	/* Square ends: a round cap would spill over the next mini-sector. */
 	.sector {
-		stroke-width: 12;
+		stroke-width: 8;
+		stroke-linecap: butt;
 	}
 	.tick {
 		stroke: #0a0a0a;
-		stroke-width: 3;
+		stroke-width: 2.5;
 	}
 	ul {
 		list-style: none;
