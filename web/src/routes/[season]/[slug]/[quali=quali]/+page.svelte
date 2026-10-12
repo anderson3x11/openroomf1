@@ -12,7 +12,9 @@
 <div class="panels">
 	<Panel
 		title="Classification"
-		desc="Best valid lap of each driver in Q1, Q2 and Q3. Red: fastest of the segment. Lines: knockouts. Gap: to the fastest time of the last segment reached."
+		desc={data.session.startsWith('fp')
+			? 'Best valid lap of each driver. Practice times depend on fuel loads and programs: a long run is not a qualifying lap.'
+			: 'Best valid lap of each driver in Q1, Q2 and Q3. Red: fastest of the segment. Lines: knockouts. Gap: to the fastest time of the last segment reached.'}
 		wide
 	>
 		<QualiTable rows={filterResults(data.results, race.filters)} logos={race.logos} />

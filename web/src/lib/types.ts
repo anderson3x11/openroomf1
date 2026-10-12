@@ -18,7 +18,7 @@ export interface GpSummary {
 }
 
 /** A folder of the GP and the URL segment of its pages ('' for the race). */
-export type Session = 'sprint-quali' | 'sprint' | 'quali' | 'race';
+export type Session = 'fp1' | 'fp2' | 'fp3' | 'sprint-quali' | 'sprint' | 'quali' | 'race';
 
 /** data/SEASON/SLUG/meta.json */
 export interface GpMeta extends GpSummary {
@@ -187,14 +187,37 @@ export interface Speeds {
 	best: number | null; // best lap
 }
 
-/** quali/results.json (and sprint-quali/), in classification order */
+/** quali/results.json (and sprint-quali/, fp1/...), in classification order */
 export interface QualiRow extends Driver {
 	pos: number;
-	q: (number | null)[]; // best valid flying lap in Q1, Q2, Q3, s; null = no time
+	q: (number | null)[]; // best valid flying lap in Q1, Q2, Q3 (practice: one value), s; null = no time
 }
 
 /** quali/laps.json: flying laps, times in seconds of session time */
 export interface QualiLaps {
 	segs: [number, number, number][]; // [segment 1-3, start, end]
 	laps: Record<string, [number, number, number, string, number][]>; // [segment, lap end, lap time, compound, deleted 0/1]
+}
+
+/** SESSION/telemetry.json: best lap of each driver, every channel every `step` metres */
+export interface Telemetry {
+	step: number;
+	w: number; // track map frame, like Circuit
+	h: number;
+	x: number[]; // track map, one point per step
+	y: number[];
+	laps: Record<string, TelemetryLap>; // fastest lap first
+}
+
+export interface TelemetryLap {
+	lap: number;
+	time: number; // lap time, s
+	cmp: string;
+	v: number[]; // speed, km/h
+	thr: number[]; // throttle, %
+	brk: number[]; // brake, 0/1
+	g: number[]; // gear
+	rpm: number[];
+	drs: number[]; // DRS open, 0/1
+	t: number[]; // time since the start of the lap, ms
 }

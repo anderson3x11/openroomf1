@@ -54,6 +54,9 @@ export const hostCountry = (gp: { host?: string | null; country: string }) => {
 
 /** Sessions of a GP as shown on the site, and their URL segment ('' for the race). */
 export const SESSION_LABELS: Record<Session, string> = {
+	fp1: 'FP1',
+	fp2: 'FP2',
+	fp3: 'FP3',
 	'sprint-quali': 'Sprint quali',
 	sprint: 'Sprint',
 	quali: 'Qualifying',

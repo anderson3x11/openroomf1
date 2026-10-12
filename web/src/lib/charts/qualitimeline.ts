@@ -47,7 +47,7 @@ export function qualiTimelineOption(data: QualiLaps, drivers: Driver[], logos: L
 				data: { value: [number, number]; seg: number; cmp: string; deleted: number };
 			}) =>
 				`${logoImg(logos, series[p.seriesIndex]?.tid ?? '')}${p.seriesName} ${formatLap(p.data.value[1])}<br>` +
-				`Q${p.data.seg} / ${p.data.cmp}${p.data.deleted ? ' / DELETED' : ''}`
+				`${data.segs.length > 1 ? `Q${p.data.seg} / ` : ''}${p.data.cmp}${p.data.deleted ? ' / DELETED' : ''}`
 		},
 		xAxis: {
 			...axis(),
@@ -75,7 +75,11 @@ export function qualiTimelineOption(data: QualiLaps, drivers: Driver[], logos: L
 					silent: true,
 					label: { color: t.muted, fontSize: 11, position: 'insideTop' },
 					data: data.segs.map(([seg, start, end]) => [
-						{ xAxis: minute(start), name: `Q${seg}`, itemStyle: { color: seg % 2 ? t.neutral : 'transparent' } },
+						{
+							xAxis: minute(start),
+							name: data.segs.length > 1 ? `Q${seg}` : '', // practice: one segment
+							itemStyle: { color: data.segs.length > 1 && seg % 2 ? t.neutral : 'transparent' }
+						},
 						{ xAxis: minute(end) }
 					])
 				}

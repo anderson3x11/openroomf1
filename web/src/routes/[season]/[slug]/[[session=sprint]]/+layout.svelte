@@ -2,9 +2,10 @@
 	import { page } from '$app/state';
 	import FilterBar from '#lib/components/FilterBar.svelte';
 	import GpHeader from '#lib/components/GpHeader.svelte';
-	import type { Filters } from '#lib/filters.ts';
+	import { filtersFromParams, filtersToParams, type Filters } from '#lib/filters.ts';
 	import { setRace } from '#lib/race.ts';
 	import { ui } from '#lib/ui.svelte.ts';
+	import { readParams, writeParams } from '#lib/url.ts';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
@@ -17,10 +18,17 @@
 	});
 
 	let filters = $state(allSelected());
-	// The layout is reused from one GP to the next: start again from "everything selected".
+	// The layout is reused from one GP to the next: start again from "everything selected",
+	// or from the filters of a shared link.
 	$effect(() => {
 		void data.meta.slug;
-		filters = allSelected();
+		void data.segment;
+		filters = filtersFromParams(readParams(), allSelected());
+	});
+	// The filters live in the URL query too (?d=, l=, c=): a link brings the same view.
+	$effect(() => {
+		void page.url.pathname; // tab links drop the query: write it again after each one
+		writeParams(filtersToParams(filters, allSelected()));
 	});
 
 	setRace({
@@ -41,6 +49,7 @@
 		{ href: `${base}/pace`, label: 'Pace' },
 		{ href: `${base}/strategy`, label: 'Strategy' },
 		{ href: `${base}/duels`, label: 'Duels' },
+		{ href: `${base}/telemetry`, label: 'Telemetry' },
 		{ href: `${base}/replay`, label: 'Replay' },
 		{ href: `${base}/radios`, label: 'Radio', count: data.radioCount }
 	]);

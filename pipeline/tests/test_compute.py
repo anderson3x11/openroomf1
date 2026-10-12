@@ -60,6 +60,16 @@ def test_strategy(laps):
     assert (ant3["cmp"], ant3["from"], ant3["to"], ant3["age"]) == ("SOFT", 37, 51, 6)
 
 
+def test_strategy_unknown_tyre_age(laps):
+    """Singapore 2026: no TyreLife on some stints, and FreshTyre False by default."""
+    rus2 = (laps["Driver"] == "RUS") & (laps["Stint"] == 2)
+    laps = laps.assign(
+        TyreLife=laps["TyreLife"].mask(rus2), FreshTyre=laps["FreshTyre"].mask(rus2, False)
+    )
+    stint = next(s for s in compute_strategy(laps) if (s["drv"], s["stint"]) == ("RUS", 2))
+    assert stint["age"] is None and stint["new"] is None
+
+
 def test_team_id_matches_cdn_slug():
     assert team_id("Red Bull Racing") == "redbullracing"
     assert team_id("Haas F1 Team") == "haasf1team"

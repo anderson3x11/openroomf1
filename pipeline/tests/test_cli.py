@@ -34,6 +34,7 @@ def test_event_sessions():
     sprint = {"Session1": "Practice 1", "Session2": "Sprint Qualifying", "Session3": "Sprint"}
     sprint |= {"Session4": "Qualifying", "Session5": "Race"}
     assert [f for f, _ in event_sessions(pd.Series(sprint))] == [
+        "fp1",
         "sprint-quali",
         "sprint",
         "quali",
@@ -41,4 +42,10 @@ def test_event_sessions():
     ]
     classic = {f"Session{i}": f"Practice {i}" for i in (1, 2, 3)}
     classic |= {"Session4": "Qualifying", "Session5": "Race"}
-    assert event_sessions(pd.Series(classic)) == [("quali", "Qualifying"), ("race", "Race")]
+    assert [f for f, _ in event_sessions(pd.Series(classic))] == [
+        "fp1",
+        "fp2",
+        "fp3",
+        "quali",
+        "race",
+    ]

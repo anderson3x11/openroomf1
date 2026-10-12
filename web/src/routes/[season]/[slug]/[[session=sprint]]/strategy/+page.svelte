@@ -20,18 +20,22 @@
 </script>
 
 <div class="panels">
-	<Panel title="Tyre strategies" desc="One stint per segment, in finishing order. Hover for the tyre age at the start of the stint.">
+	<Panel
+		title="Tyre strategies"
+		desc="One stint per segment, in finishing order. Number: last lap of the stint (pit stop, then flag). Hover for the tyre age at the start of the stint."
+	>
 		<p class="legend">
 			{#each compounds as c (c)}
 				<span class="label"><span class="swatch" style:background={tyreColor(c)}></span>{c}</span>
 			{/each}
+			<span class="label"><span class="swatch used"></span>USED TYRES</span>
 		</p>
 		<Chart
 			option={withLapRange(
 				strategyOption(stints, results, data.positions.laps, race.logos, race.filters.compounds),
 				race.filters.laps
 			)}
-			height={results.length * 24 + 48}
+			height={results.length * 26 + 48}
 		/>
 	</Panel>
 
@@ -67,6 +71,9 @@
 </div>
 
 <style>
+	.used {
+		background: repeating-linear-gradient(-45deg, var(--ink-muted) 0 2px, transparent 2px 5px);
+	}
 	.legend {
 		display: flex;
 		gap: 16px;

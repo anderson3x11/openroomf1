@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { BarChart, BoxplotChart, HeatmapChart, LineChart, ScatterChart } from 'echarts/charts';
 	import {
+		AriaComponent,
 		GridComponent,
 		LegendComponent,
 		TooltipComponent,
@@ -20,6 +21,7 @@
 		HeatmapChart,
 		ScatterChart,
 		VisualMapComponent,
+		AriaComponent,
 		MarkLineComponent,
 		MarkAreaComponent,
 		DataZoomComponent,

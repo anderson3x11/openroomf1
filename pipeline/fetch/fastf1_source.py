@@ -7,14 +7,14 @@ import fastf1
 from fastf1.core import Session
 
 
-def load_session(season: int, round_: int, name: str, cache_dir: Path, telemetry: bool) -> Session:
-    """name: FastF1 session name ("Race", "Sprint", "Qualifying", "Sprint Qualifying")."""
+def load_session(season: int, round_: int, name: str, cache_dir: Path) -> Session:
+    """name: FastF1 session name ("Race", "Sprint", "Qualifying", "Practice 1", ...)."""
     cache_dir.mkdir(parents=True, exist_ok=True)
     fastf1.Cache.enable_cache(str(cache_dir))
     session = fastf1.get_session(season, round_, name)
-    # Telemetry brings car positions (circuit outline, replay): about 120 MB of temporary cache
-    # per race. Messages flag deleted laps.
-    session.load(telemetry=telemetry, weather=telemetry, messages=True)
+    # Telemetry brings car data and positions (best laps, track map, replay): about 120 MB of
+    # temporary cache per session. Messages flag deleted laps.
+    session.load(telemetry=True, weather=True, messages=True)
     return session
 
 

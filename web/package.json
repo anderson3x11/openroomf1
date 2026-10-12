@@ -8,7 +8,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
-		"test": "node --experimental-strip-types src/lib/stats.test.ts && node --experimental-strip-types src/lib/filters.test.ts && node --experimental-strip-types src/lib/format.test.ts && node --experimental-strip-types src/lib/duels.test.ts && node --experimental-strip-types src/lib/quali.test.ts",
+		"test": "node --experimental-strip-types src/lib/stats.test.ts && node --experimental-strip-types src/lib/filters.test.ts && node --experimental-strip-types src/lib/format.test.ts && node --experimental-strip-types src/lib/duels.test.ts && node --experimental-strip-types src/lib/quali.test.ts && node --experimental-strip-types src/lib/telemetry.test.ts",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},

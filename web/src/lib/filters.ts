@@ -49,3 +49,29 @@ export function filterEvents(events: RaceEvents, f: Filters): RaceEvents {
 export function withLapRange<T extends { xAxis: object }>(option: T, [from, to]: [number, number]): T {
 	return { ...option, xAxis: { ...option.xAxis, min: from - 1, max: to } };
 }
+
+/** Filters as URL query values, to share a view: only what differs from `all` is written.
+ * d: drivers, l: lap range, c: compounds. */
+export function filtersToParams(f: Filters, all: Filters): Record<string, string | null> {
+	const same = (a: Set<string>, b: Set<string>) => a.size === b.size && [...a].every((x) => b.has(x));
+	return {
+		d: same(f.drivers, all.drivers) ? null : [...f.drivers].join(','),
+		l: f.laps[0] === all.laps[0] && f.laps[1] === all.laps[1] ? null : `${f.laps[0]}-${f.laps[1]}`,
+		c: same(f.compounds, all.compounds) ? null : [...f.compounds].join(',')
+	};
+}
+
+/** Inverse of filtersToParams; unknown drivers, compounds and laps out of range are dropped. */
+export function filtersFromParams(params: URLSearchParams, all: Filters): Filters {
+	const pick = (key: string, valid: Set<string>) => {
+		const v = params.get(key);
+		return v === null ? new Set(valid) : new Set(v.split(',').filter((x) => valid.has(x)));
+	};
+	const [from, to] = (params.get('l') ?? '').split('-').map(Number);
+	const inRange = (n: number) => Number.isInteger(n) && n >= all.laps[0] && n <= all.laps[1];
+	return {
+		drivers: pick('d', all.drivers),
+		laps: inRange(from) && inRange(to) && from <= to ? [from, to] : [...all.laps],
+		compounds: pick('c', all.compounds)
+	};
+}

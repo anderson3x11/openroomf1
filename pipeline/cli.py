@@ -30,6 +30,7 @@ from pipeline.compute.speeds import compute_speeds
 from pipeline.compute.standings import compute_standings
 from pipeline.compute.strategy import compute_strategy
 from pipeline.compute.summary import fastest_lap
+from pipeline.compute.telemetry import best_laps, compute_telemetry
 from pipeline.compute.track import neutralized_laps
 from pipeline.compute.weather import compute_weather
 from pipeline.export.writer import dir_size, slugify, write_gp
@@ -62,6 +63,9 @@ def latest_round(schedule: pd.DataFrame, today: date) -> int | None:
 
 # FastF1 session name -> data folder and URL segment, in weekend order.
 SESSIONS = {
+    "Practice 1": "fp1",
+    "Practice 2": "fp2",
+    "Practice 3": "fp3",
     "Sprint Qualifying": "sprint-quali",
     "Sprint Shootout": "sprint-quali",  # 2023 name of the sprint qualifying
     "Sprint": "sprint",
@@ -94,7 +98,7 @@ def run(args: argparse.Namespace) -> None:
         print(f"Latest race: {args.season} round {args.round}")
 
     # The race is required: without it nothing is written. Other sessions are a bonus.
-    race = load_session(args.season, args.round, "Race", args.cache_dir, telemetry=True)
+    race = load_session(args.season, args.round, "Race", args.cache_dir)
     event = race.event
     results = compute_results(race.results)
     fetch_logos(
@@ -107,9 +111,7 @@ def run(args: argparse.Namespace) -> None:
         if folder == "race":
             continue
         try:
-            session = load_session(
-                args.season, args.round, name, args.cache_dir, telemetry=folder == "sprint"
-            )
+            session = load_session(args.season, args.round, name, args.cache_dir)
             if folder == "sprint":
                 files |= race_files(session, folder, args.season)
             else:
@@ -181,17 +183,49 @@ def race_files(session, folder: str, season: int, standings: dict | None = None)
     }
     if standings:
         files["standings"] = compute_standings(**standings, results=results)
+    files["telemetry"] = telemetry_of(session)
     return {f"{folder}/{name}.json": obj for name, obj in files.items()}
 
 
 def quali_files(session, folder: str) -> dict:
-    """Files of a qualifying or a sprint qualifying, under FOLDER/."""
-    parts = list(session.laps.split_qualifying_sessions())
+    """Files of a qualifying, a sprint qualifying or a free practice, under FOLDER/. Practice
+    is one segment: its classification is the best lap of each driver."""
+    laps = session.laps
+    parts = [laps] if folder.startswith("fp") else list(laps.split_qualifying_sessions())
     return {
         f"{folder}/results.json": compute_quali(parts, session.results),
         f"{folder}/laps.json": compute_quali_laps(parts),
-        f"{folder}/speeds.json": compute_speeds(session.laps),
+        f"{folder}/speeds.json": compute_speeds(laps),
+        f"{folder}/telemetry.json": telemetry_of(session),
     }
+
+
+def rotation_of(session) -> float:
+    """Rotation that matches the official track map, 0 when FastF1 does not know the circuit."""
+    try:
+        return session.get_circuit_info().rotation
+    except AttributeError:  # unknown circuit (Madrid 2026): FastF1 fails internally
+        return 0.0
+
+
+def telemetry_of(session) -> dict | None:
+    """Best lap telemetry of every driver; None when the session has no car data."""
+    tel, info = {}, {}
+    for lap in best_laps(session.laps).itertuples():
+        try:
+            data = session.laps.loc[lap.Index].get_telemetry()
+        except (KeyError, ValueError) as e:
+            print(f"WARNING: no telemetry for {lap.Driver}: {e!r}")
+            continue
+        if len(data) < 100:
+            continue
+        tel[lap.Driver] = data
+        info[lap.Driver] = {
+            "lap": int(lap.LapNumber),
+            "time": round(lap.LapTime.total_seconds(), 3),
+            "cmp": lap.Compound if isinstance(lap.Compound, str) else "UNKNOWN",
+        }
+    return compute_telemetry(tel, info, rotation_of(session)) if tel else None
 
 
 def outline_lap_pos(laps):
@@ -224,7 +258,7 @@ def _circuit_and_replay(session, results: list[dict]) -> tuple[dict, dict]:
         info = session.get_circuit_info()
     except AttributeError:  # unknown circuit for FastF1 (Madrid 2026): FastF1 fails internally
         info = None
-    rotation = info.rotation if info is not None else 0.0
+    rotation = rotation_of(session)
     corners = (
         info.corners if info is not None else pd.DataFrame(columns=["X", "Y", "Number", "Letter"])
     )
