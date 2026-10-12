@@ -16,6 +16,17 @@
 			.slice(from, to + 1)
 			.map((x, i) => `${x},${tel.y[from + i]}`)
 			.join(' ');
+	// A short bar across the track at the start of each mini-sector, perpendicular to it.
+	const ticks = $derived(
+		sectors.map(({ from }) => {
+			const a = Math.max(from - 1, 0);
+			const b = Math.min(from + 1, tel.x.length - 1);
+			const dx = tel.x[b] - tel.x[a];
+			const dy = tel.y[b] - tel.y[a];
+			const k = 11 / (Math.hypot(dx, dy) || 1); // half length, a bit wider than the track
+			return { x: tel.x[from], y: tel.y[from], nx: -dy * k, ny: dx * k };
+		})
+	);
 	const won = $derived(drivers.map((d, i) => ({ d, n: sectors.filter((s) => s.best === i).length })));
 </script>
 
@@ -24,6 +35,9 @@
 		<polyline class="track" points={points(0, tel.x.length - 1)} />
 		{#each sectors as s, k (k)}
 			<polyline class="sector" points={points(s.from, s.to)} style:stroke={colors[drivers[s.best]]} />
+		{/each}
+		{#each ticks as t, k (k)}
+			<line class="tick" x1={t.x - t.nx} y1={t.y - t.ny} x2={t.x + t.nx} y2={t.y + t.ny} />
 		{/each}
 	</svg>
 	<ul class="label">
@@ -53,6 +67,10 @@
 	}
 	.sector {
 		stroke-width: 12;
+	}
+	.tick {
+		stroke: #0a0a0a;
+		stroke-width: 3;
 	}
 	ul {
 		list-style: none;
