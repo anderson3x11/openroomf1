@@ -1,6 +1,6 @@
 // The view lives in the URL query (filters, compared drivers): a link reproduces it.
 // Browser only: pages are prerendered, without a query.
-import { replaceState } from '$app/navigation';
+import { goto } from '$app/navigation';
 import { page } from '$app/state';
 
 export const readParams = () => new URLSearchParams(window.location.search);
@@ -12,5 +12,5 @@ export function writeParams(values: Record<string, string | null>) {
 		if (v === null) url.searchParams.delete(k);
 		else url.searchParams.set(k, v);
 	}
-	if (url.href !== window.location.href) replaceState(url, page.state);
+	if (url.href !== window.location.href) goto(url, { state: page.state, shallow: true, replace: true });
 }

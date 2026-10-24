@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tokens } from '#lib/charts/theme.ts';
 	import { miniSectors, smooth } from '#lib/telemetry.ts';
 	import type { Telemetry } from '#lib/types.ts';
 
@@ -36,12 +37,14 @@
 
 <div class="map">
 	<svg viewBox="-20 -20 {tel.w + 40} {tel.h + 40}" role="img" aria-label="Fastest driver in each mini-sector">
-		<polyline class="track" points={points(0, xs.length - 1)} />
+		<!-- Styles as SVG attributes, not CSS: the panel screenshot (html-to-image) keeps them. -->
+		<polyline points={points(0, xs.length - 1)} fill="none" stroke={tokens().rule} stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
 		{#each sectors as s, k (k)}
-			<polyline class="sector" points={points(s.from, s.to)} style:stroke={colors[drivers[s.best]]} />
+			<!-- Square ends: a round cap would spill over the next mini-sector. -->
+			<polyline points={points(s.from, s.to)} fill="none" stroke={colors[drivers[s.best]]} stroke-width="8" stroke-linecap="butt" stroke-linejoin="round" />
 		{/each}
 		{#each ticks as t, k (k)}
-			<line class="tick" x1={t.x - t.nx} y1={t.y - t.ny} x2={t.x + t.nx} y2={t.y + t.ny} />
+			<line x1={t.x - t.nx} y1={t.y - t.ny} x2={t.x + t.nx} y2={t.y + t.ny} stroke="#0a0a0a" stroke-width="2.5" />
 		{/each}
 	</svg>
 	<ul class="label">
@@ -59,24 +62,6 @@
 	svg {
 		width: 100%;
 		max-height: 520px;
-	}
-	polyline {
-		fill: none;
-		stroke-linejoin: round;
-	}
-	.track {
-		stroke: var(--rule);
-		stroke-width: 14;
-		stroke-linecap: round;
-	}
-	/* Square ends: a round cap would spill over the next mini-sector. */
-	.sector {
-		stroke-width: 8;
-		stroke-linecap: butt;
-	}
-	.tick {
-		stroke: #0a0a0a;
-		stroke-width: 2.5;
 	}
 	ul {
 		list-style: none;

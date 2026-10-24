@@ -22,7 +22,7 @@
 	const isolate = (drv: string) => (hidden = new Set(all.filter((d) => d !== drv)));
 </script>
 
-<div class="picker" role="group" aria-label="Drivers shown on this chart">
+<div class="picker" role="group" aria-label="Drivers shown on this chart" data-noshot>
 	<button class="label link" onclick={() => (hidden = new Set())}>[ ALL ]</button>
 	<button class="label link" onclick={() => (hidden = new Set(all))}>[ NONE ]</button>
 	{#each results as r (r.drv)}

@@ -1,6 +1,6 @@
 // Run with: node --experimental-strip-types src/lib/filters.test.ts
 import assert from 'node:assert/strict';
-import { filterEvents, filterLapTimes, filtersFromParams, filtersToParams, type Filters } from './filters.ts';
+import { filterEvents, filterLapTimes, filtersFromParams, filtersSummary, filtersToParams, type Filters } from './filters.ts';
 import type { Stint } from './types.ts';
 
 const f: Filters = { drivers: new Set(['RUS']), laps: [10, 20], compounds: new Set(['SOFT']) };
@@ -36,5 +36,9 @@ const junk = filtersFromParams(new URLSearchParams('d=RUS,XXX&l=50-90&c=WET'), a
 assert.deepEqual([...junk.drivers], ['RUS']);
 assert.deepEqual(junk.laps, [1, 57]);
 assert.equal(junk.compounds.size, 0);
+
+// Screenshot caption: only what is filtered.
+assert.equal(filtersSummary(all, all), '');
+assert.equal(filtersSummary(view, all), 'RUS, VER / LAPS 10-20');
 
 console.log('filters ok');

@@ -2,7 +2,8 @@
 	import { page } from '$app/state';
 	import FilterBar from '#lib/components/FilterBar.svelte';
 	import GpHeader from '#lib/components/GpHeader.svelte';
-	import { filtersFromParams, filtersToParams, type Filters } from '#lib/filters.ts';
+	import { filtersFromParams, filtersSummary, filtersToParams, type Filters } from '#lib/filters.ts';
+	import { SESSION_LABELS } from '#lib/format.ts';
 	import { setRace } from '#lib/race.ts';
 	import { ui } from '#lib/ui.svelte.ts';
 	import { readParams, writeParams } from '#lib/url.ts';
@@ -40,6 +41,15 @@
 		},
 		get logos() {
 			return data.logos[ui.theme];
+		},
+		get shot() {
+			const session = data.segment ? 'sprint' : 'race';
+			const head = `${data.meta.name} ${data.meta.season} / ${SESSION_LABELS[session]}`.toUpperCase();
+			const active = filtersSummary(filters, allSelected());
+			return {
+				caption: active ? `${head} / ${active}` : head,
+				file: `openroom-${data.meta.season}-${data.meta.slug}-${session}`
+			};
 		}
 	});
 

@@ -64,7 +64,7 @@
 			desc="Pick up to {MAX} drivers. The first one is the reference of the delta: above zero, time lost to him. Mouse wheel or bottom slider to zoom on a corner. The link keeps the drivers chosen."
 			wide
 		>
-			<div class="picker">
+			<div class="picker" data-noshot>
 				{#each available as r (r.drv)}
 					<button
 						class="chip"
@@ -80,7 +80,7 @@
 					<table class="data">
 						<thead>
 							<tr class="label">
-								<th>DRIVER</th><th class="num">LAP</th><th class="num">TIME</th><th class="num">GAP</th><th>TYRE</th><th></th>
+								<th>DRIVER</th><th class="num">LAP</th><th class="num">TIME</th><th class="num">GAP</th><th>TYRE</th><th data-noshot></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -92,7 +92,7 @@
 									<td class="num">{formatLap(lap.time)}</td>
 									<td class="num muted">{i ? `+${(lap.time - tel.laps[selected[0]].time).toFixed(3)}` : 'REF'}</td>
 									<td class="muted">{lap.cmp}</td>
-									<td>{#if i}<button class="label link" onclick={() => setRef(d)}>[ SET AS REF ]</button>{/if}</td>
+									<td data-noshot>{#if i}<button class="label link" onclick={() => setRef(d)}>[ SET AS REF ]</button>{/if}</td>
 								</tr>
 							{/each}
 						</tbody>

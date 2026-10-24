@@ -12,6 +12,7 @@
 		VisualMapComponent
 	} from 'echarts/components';
 	import * as echarts from 'echarts/core';
+	import { capture } from '#lib/capture.svelte.ts';
 	import { SVGRenderer } from 'echarts/renderers';
 
 	echarts.use([
@@ -51,6 +52,15 @@
 	// Filters rebuild the option: replace it without recreating the chart.
 	$effect(() => {
 		chart?.setOption(option, { notMerge: true });
+	});
+
+	// Screenshots: no zoom slider, but the zoom itself is kept (merged, not replaced).
+	$effect(() => {
+		const show = !capture.on;
+		const zooms = (chart?.getOption()?.dataZoom ?? []) as { type: string }[];
+		if (!chart || !zooms.some((z) => z.type === 'slider')) return;
+		chart.setOption({ dataZoom: zooms.map((z) => (z.type === 'slider' ? { show } : {})) });
+		chart.getZr().flush();
 	});
 </script>
 

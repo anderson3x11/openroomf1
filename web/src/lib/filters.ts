@@ -75,3 +75,15 @@ export function filtersFromParams(params: URLSearchParams, all: Filters): Filter
 		compounds: pick('c', all.compounds)
 	};
 }
+
+/** Active filters in one line, for the caption of a screenshot: "VER, LEC / LAPS 10-40".
+ * Empty when everything is selected. */
+export function filtersSummary(f: Filters, all: Filters): string {
+	const parts = [];
+	if (f.drivers.size !== all.drivers.size) {
+		parts.push(f.drivers.size <= 6 ? [...f.drivers].join(', ') : `${f.drivers.size}/${all.drivers.size} DRIVERS`);
+	}
+	if (f.laps[0] !== all.laps[0] || f.laps[1] !== all.laps[1]) parts.push(`LAPS ${f.laps[0]}-${f.laps[1]}`);
+	if (f.compounds.size !== all.compounds.size) parts.push([...f.compounds].join(', '));
+	return parts.join(' / ');
+}
