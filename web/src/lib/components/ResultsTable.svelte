@@ -24,7 +24,7 @@
 		<thead>
 			<tr class="label">
 				<th class="num">POS</th><th>DRIVER</th><th>TEAM</th><th class="num">GRID</th>
-				<th class="num">+/-</th><th class="num" title="Overtakes, official F1 data">OVT</th>
+				<th class="num">+/-</th><th class="num" title="Overtakes made, from the F1 timing feed">OVT</th>
 				<th class="num" title="Laps led">LED</th><th class="num">PTS</th><th>STATUS</th>
 			</tr>
 		</thead>

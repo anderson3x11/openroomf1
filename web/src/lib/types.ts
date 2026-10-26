@@ -78,7 +78,7 @@ export interface PitStop {
 	drv: string;
 	lap: number; // in-lap
 	lane: number; // seconds between pit entry and pit exit
-	stop: number | null; // official stationary time, seconds
+	stop: number | null; // official stationary time, seconds (null since OpenF1, October 2026)
 	before: number | null; // position at the end of the lap before the in-lap
 	after: number | null; // position at the end of the out-lap
 	under: Neutral | null;
@@ -124,7 +124,7 @@ export interface Radio {
 /** race/summary.json */
 export interface Summary {
 	fastest: { drv: string; lap: number; t: number } | null; // over every non deleted lap
-	overtakes: Record<string, number>; // official F1 overtake count per driver
+	overtakes: Record<string, number>; // overtakes made per driver, from the F1 timing feed
 }
 
 /** race/circuit.json: outline in a WIDTH x h frame, y going down (SVG) */
@@ -158,7 +158,7 @@ export interface RaceTrace {
 	trace: Record<string, (number | null)[]>;
 }
 
-/** race/weather.json: FastF1 readings between start and flag, lap = leader's fractional lap */
+/** race/weather.json: readings (about one a minute) between start and flag, lap = leader's fractional lap */
 export interface Weather {
 	lap: number[];
 	air: number[]; // °C

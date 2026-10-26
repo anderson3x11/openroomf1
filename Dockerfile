@@ -1,5 +1,5 @@
 # Built by Coolify on every push: the static site from web/ and the versioned data/, served by Caddy.
-# The pipeline runs on a home PC (deploy/publish.sh): the F1 live timing archive refuses datacenter IPs.
+# The pipeline runs by hand on a PC (deploy/publish.sh), the server only builds and serves.
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
 COPY web/package.json web/package-lock.json web/

@@ -93,46 +93,41 @@ def test_gaps(laps):
     assert out["gap"]["RUS"][0] is None
 
 
-def test_pitstops(laps, results, live_feeds):
-    stops = compute_pitstops(laps, live_feeds["PitStopSeries"], compute_results(results))
+def test_pitstops(laps, results, openf1_records):
+    stops = compute_pitstops(laps, openf1_records["pit"], compute_results(results))
     ant = [s for s in stops if s["drv"] == "ANT"]
     assert ant[0] == {
         "drv": "ANT",
         "lap": 30,
         "lane": 20.9,
-        "stop": 2.6,  # official stationary time
+        "stop": None,  # OpenF1 has no stationary time in 2026
         "before": 9,
         "after": 8,
         "under": "sc",
     }
-    # Lap 36: tyres changed while all cars went through the pit lane, no official stop time.
-    assert ant[1]["lap"] == 36 and ant[1]["stop"] is None
+    assert ant[1]["lap"] == 36
 
 
-def test_pitstops_without_feed(laps, results):
-    stops = compute_pitstops(laps, {}, compute_results(results))
-    assert stops and all(s["stop"] is None for s in stops)
+def test_pitstops_stationary_time(laps, results):
+    pit = {"driver_number": 12, "lap_number": 30, "stop_duration": 2.6}
+    stops = compute_pitstops(laps, [pit], compute_results(results))
+    assert next(s for s in stops if s["drv"] == "ANT")["stop"] == 2.6
 
 
-def test_overtakes(results, live_feeds):
-    out = compute_overtakes(live_feeds["OvertakeSeries"], compute_results(results))
-    assert out == {"RUS": 0, "ANT": 14, "NOR": 4}  # RUS led every lap
-    assert compute_overtakes({}, compute_results(results)) == {"RUS": 0, "ANT": 0, "NOR": 0}
+def test_overtakes(results, openf1_records):
+    out = compute_overtakes(openf1_records["overtakes"], compute_results(results))
+    assert out == {"RUS": 0, "ANT": 14, "NOR": 4}  # same as the archive's official counts
+    assert compute_overtakes([], compute_results(results)) == {"RUS": 0, "ANT": 0, "NOR": 0}
 
 
-def test_overtakes_noisy_feed(results):
-    # Round 1 2026 archive: events repeated a few ms apart, and artifacts counting 21.
-    feed = {
-        "Overtakes": {
-            "12": [
-                {"Timestamp": "2026-03-08T04:05:57.047Z", "count": 1},
-                {"Timestamp": "2026-03-08T04:05:57.048Z", "count": 1},
-                {"Timestamp": "2026-03-08T04:06:00.301Z", "count": 21},
-                {"Timestamp": "2026-03-08T04:14:56.186Z", "count": 2},
-            ]
-        }
-    }
-    assert compute_overtakes(feed, compute_results(results))["ANT"] == 3
+def test_overtakes_repeated_records(results):
+    o = {"overtaking_driver_number": 12, "overtaken_driver_number": 1}
+    records = [
+        {**o, "date": "2026-03-08T04:05:57.047000+00:00"},
+        {**o, "date": "2026-03-08T04:05:57.048000+00:00"},  # same event, a ms later
+        {**o, "date": "2026-03-08T04:14:56.186000+00:00"},
+    ]
+    assert compute_overtakes(records, compute_results(results))["ANT"] == 2
 
 
 def test_fastest_lap(laps):

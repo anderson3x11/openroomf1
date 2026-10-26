@@ -1,23 +1,17 @@
-"""Official overtake counts per driver, from the live timing OvertakeSeries feed."""
-
-# Restarts give a handful of overtakes at once at most. The round 1 2026 archive has events
-# counting 21 (the whole field minus one): feed artifacts, dropped.
-# Note: fixed threshold, revisit if a real event ever counts more.
-MAX_PER_EVENT = 10
+"""Official overtake counts per driver, from OpenF1 (the F1 feed's overtakes, one per record)."""
 
 
-def compute_overtakes(feed: dict, results: list[dict]) -> dict[str, int]:
-    """DRV -> overtakes made. Each feed entry is one event with the overtakes it counted.
-
-    Some archives repeat every event a few milliseconds apart (round 1 of 2026): events are
-    unique by timestamp to the second.
-    """
+def compute_overtakes(overtakes: list[dict], results: list[dict]) -> dict[str, int]:
+    """DRV -> overtakes made. A record repeated within the same second counts once: some feeds
+    repeat their events a few milliseconds apart."""
     drv_by_number = {r["num"]: r["drv"] for r in results}
     totals = {r["drv"]: 0 for r in results}
-    for number, events in feed.get("Overtakes", {}).items():
-        drv = drv_by_number.get(number)
-        if drv is None:
-            continue
-        unique = {e.get("Timestamp", "")[:19]: int(e.get("count", 0)) for e in events}
-        totals[drv] = sum(c for c in unique.values() if c <= MAX_PER_EVENT)
+    unique = {
+        (o["overtaking_driver_number"], o["overtaken_driver_number"], o["date"][:19])
+        for o in overtakes
+    }
+    for number, _, _ in unique:
+        drv = drv_by_number.get(str(number))
+        if drv is not None:
+            totals[drv] += 1
     return totals

@@ -41,7 +41,7 @@
 
 	<Panel
 		title="Pit stops"
-		desc="Official stationary time, time in the pit lane, position before the stop and after the out lap."
+		desc="Time in the pit lane, position before the stop and after the out lap. Official stationary time when the data has it."
 	>
 		<PitStopsTable stops={pitstops} results={data.results} logos={race.logos} />
 	</Panel>

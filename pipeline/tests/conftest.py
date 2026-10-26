@@ -64,12 +64,9 @@ def standings() -> dict[str, pd.DataFrame]:
 
 
 @pytest.fixture
-def live_feeds() -> dict[str, dict]:
-    """Live timing OvertakeSeries and PitStopSeries keyframes of the full race."""
-    return {
-        feed: json.loads((FIXTURES / f"{PREFIX}{feed}.json").read_text())
-        for feed in ("OvertakeSeries", "PitStopSeries")
-    }
+def openf1_records() -> dict[str, list[dict]]:
+    """OpenF1 overtakes and pit records of the race involving RUS, ANT or NOR."""
+    return json.loads((FIXTURES / f"{PREFIX}openf1.json").read_text())
 
 
 @pytest.fixture

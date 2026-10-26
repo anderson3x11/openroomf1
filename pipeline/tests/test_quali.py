@@ -40,3 +40,18 @@ def test_quali_laps(quali_parts):
     assert min(lap[2] for lap in ver if lap[0] == 3) == 95.13
     assert all(lap[2] < 110 for laps in out["laps"].values() for lap in laps)  # no cool-down lap
     assert [lap[4] for lap in out["laps"]["ANT"]].count(1) == 1  # the deleted lap, flagged
+
+
+def test_quali_retired_driver_without_position(quali_parts, quali_results):
+    """OpenF1 gives "RT" as the position of a driver retired in qualifying: the others keep
+    their official positions, he comes after them."""
+    results = quali_results.assign(Position=quali_results["Position"].astype(object))
+    results.loc[results["Abbreviation"] == "ANT", "Position"] = "RT"
+    rows = compute_quali(quali_parts, results)
+    assert [(r["drv"], r["pos"]) for r in rows] == [
+        ("VER", 1),
+        ("LAW", 11),
+        ("COL", 15),
+        ("PER", 22),
+        ("ANT", 23),
+    ]

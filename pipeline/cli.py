@@ -24,7 +24,7 @@ from pipeline.compute.overtakes import compute_overtakes
 from pipeline.compute.pitstops import compute_pitstops
 from pipeline.compute.positions import compute_positions
 from pipeline.compute.quali import compute_quali, compute_quali_laps
-from pipeline.compute.radios import compute_radios, session_to_utc
+from pipeline.compute.radios import compute_radios
 from pipeline.compute.results import compute_results
 from pipeline.compute.speeds import compute_speeds
 from pipeline.compute.standings import compute_standings
@@ -82,14 +82,16 @@ def event_sessions(event) -> list[tuple[str, str]]:
 
 def run(args: argparse.Namespace) -> None:
     # Imported here so the CLI and its tests do not pay for the FastF1 import.
-    from pipeline.fetch.fastf1_source import load_session, purge_cache
+    import fastf1
+
+    from pipeline.fetch.fastf1_source import prepare_cache, purge_cache
     from pipeline.fetch.jolpica import FLAGS, load_circuit, load_standings
     from pipeline.fetch.logos import fetch_logos
+    from pipeline.fetch.openf1_session import Session
     from pipeline.fetch.youtube import fetch_thumbnail, find_highlights
 
+    prepare_cache(args.cache_dir)
     if args.latest:
-        import fastf1
-
         schedule = fastf1.get_event_schedule(args.season, include_testing=False)
         args.round = latest_round(schedule, date.today())
         if args.round is None:
@@ -97,27 +99,28 @@ def run(args: argparse.Namespace) -> None:
             return
         print(f"Latest race: {args.season} round {args.round}")
 
+    # Timing comes from OpenF1 (the F1 archive needs an F1 TV login since October 2026).
     # The race is required: without it nothing is written. Other sessions are a bonus.
-    race = load_session(args.season, args.round, "Race", args.cache_dir)
-    event = race.event
+    event = fastf1.get_event(args.season, args.round)
+    race = Session(args.season, event, "Race")
     results = compute_results(race.results)
     fetch_logos(
         args.season, {r["tid"] for r in results}, args.data_dir / str(args.season) / "logos"
     )
     standings = load_standings(args.season, args.round)
-    files = race_files(race, "race", args.season, standings)
+    files = race_files(race, "race", standings)
     done = {"race"}
     for folder, name in event_sessions(event):
         if folder == "race":
             continue
         try:
-            session = load_session(args.season, args.round, name, args.cache_dir)
+            session = Session(args.season, event, name)
             if folder == "sprint":
-                files |= race_files(session, folder, args.season)
+                files |= race_files(session, folder)
             else:
                 files |= quali_files(session, folder)
             done.add(folder)
-        except Exception as e:  # FastF1 raises many kinds, and the race must not wait on them
+        except Exception as e:  # a missing session raises many kinds; the race must not wait
             print(f"WARNING: {name} skipped: {e!r}")
 
     meta = {
@@ -148,28 +151,23 @@ def run(args: argparse.Namespace) -> None:
         purge_cache(args.cache_dir)
 
 
-def race_files(session, folder: str, season: int, standings: dict | None = None) -> dict:
+def race_files(session, folder: str, standings: dict | None = None) -> dict:
     """Files of a race or a sprint, under FOLDER/. Standings only after the race."""
-    from pipeline.fetch.livetiming import load_feed
-    from pipeline.fetch.openf1 import load_team_radio
-
     results = compute_results(session.results)
     laps = session.laps
     neutral = neutralized_laps(laps)  # timeline only, read on the leader's laps
     messages = session.race_control_messages
-    radios = load_team_radio(season, session.date.date(), session.name)
-    overtakes = compute_overtakes(load_feed(session.api_path, "OvertakeSeries"), results)
-    pit_feed = load_feed(session.api_path, "PitStopSeries")
     circuit, replay = circuit_and_replay(session, results)
-    # t0_date (exact, needs telemetry) turns session time into UTC; race control as a fallback.
-    clock = session.t0_date if session.t0_date is not None else session_to_utc(messages, laps)
     files = {
         "results": results,
         "positions": compute_positions(laps, session.results),
         "gaps": compute_gaps(laps),
         "strategy": compute_strategy(laps),
-        "pitstops": compute_pitstops(laps, pit_feed, results),
-        "summary": {"fastest": fastest_lap(laps), "overtakes": overtakes},
+        "pitstops": compute_pitstops(laps, session.pits, results),
+        "summary": {
+            "fastest": fastest_lap(laps),
+            "overtakes": compute_overtakes(session.overtakes, results),
+        },
         "circuit": circuit,
         "replay": replay,
         "laptimes": compute_laptimes(laps),
@@ -179,7 +177,8 @@ def race_files(session, folder: str, season: int, standings: dict | None = None)
         "speeds": compute_speeds(laps),
         "weather": compute_weather(session.weather_data, laps),
         "events": compute_events(messages, neutral),
-        "radios": compute_radios(radios, laps, results, clock),
+        # Session time zero is the OpenF1 session start, in UTC.
+        "radios": compute_radios(session.radios, laps, results, session.t0),
     }
     if standings:
         files["standings"] = compute_standings(**standings, results=results)
@@ -191,7 +190,7 @@ def quali_files(session, folder: str) -> dict:
     """Files of a qualifying, a sprint qualifying or a free practice, under FOLDER/. Practice
     is one segment: its classification is the best lap of each driver."""
     laps = session.laps
-    parts = [laps] if folder.startswith("fp") else list(laps.split_qualifying_sessions())
+    parts = [laps] if folder.startswith("fp") else session.qualifying_parts()
     return {
         f"{folder}/results.json": compute_quali(parts, session.results),
         f"{folder}/laps.json": compute_quali_laps(parts),
@@ -200,20 +199,12 @@ def quali_files(session, folder: str) -> dict:
     }
 
 
-def rotation_of(session) -> float:
-    """Rotation that matches the official track map, 0 when FastF1 does not know the circuit."""
-    try:
-        return session.get_circuit_info().rotation
-    except AttributeError:  # unknown circuit (Madrid 2026): FastF1 fails internally
-        return 0.0
-
-
 def telemetry_of(session) -> dict | None:
     """Best lap telemetry of every driver; None when the session has no car data."""
     tel, info = {}, {}
     for lap in best_laps(session.laps).itertuples():
         try:
-            data = session.laps.loc[lap.Index].get_telemetry()
+            data = session.telemetry(session.laps.loc[lap.Index])
         except (KeyError, ValueError) as e:
             print(f"WARNING: no telemetry for {lap.Driver}: {e!r}")
             continue
@@ -225,19 +216,19 @@ def telemetry_of(session) -> dict | None:
             "time": round(lap.LapTime.total_seconds(), 3),
             "cmp": lap.Compound if isinstance(lap.Compound, str) else "UNKNOWN",
         }
-    return compute_telemetry(tel, info, rotation_of(session)) if tel else None
+    return compute_telemetry(tel, info, session.circuit()[0]) if tel else None
 
 
-def outline_lap_pos(laps):
-    """Position data of the fastest lap that has some: FastF1 misses it on a few laps."""
+def outline_lap_pos(laps, pos: dict[str, pd.DataFrame]):
+    """Positions (X, Y) through the fastest lap that has some: a few laps miss them."""
     ranked = laps.dropna(subset=["LapTime"]).sort_values("LapTime")
-    for i in range(min(20, len(ranked))):
-        try:
-            pos = ranked.iloc[i].get_pos_data()
-        except (KeyError, ValueError):
+    for lap in ranked.head(20).itertuples():
+        p = pos.get(lap.DriverNumber)
+        if p is None:
             continue
-        if len(pos) > 100:
-            return pos
+        inside = p[(p["SessionTime"] >= lap.LapStartTime) & (p["SessionTime"] <= lap.Time)]
+        if len(inside) > 100:
+            return inside
     raise ValueError("no lap with position data")
 
 
@@ -253,18 +244,12 @@ def circuit_and_replay(session, results: list[dict]) -> tuple[dict | None, dict 
 
 def _circuit_and_replay(session, results: list[dict]) -> tuple[dict, dict]:
     laps = session.laps
-    lap_pos = outline_lap_pos(laps)
-    try:
-        info = session.get_circuit_info()
-    except AttributeError:  # unknown circuit for FastF1 (Madrid 2026): FastF1 fails internally
-        info = None
-    rotation = rotation_of(session)
-    corners = (
-        info.corners if info is not None else pd.DataFrame(columns=["X", "Y", "Number", "Letter"])
-    )
+    pos_by_number = session.pos_data()
+    lap_pos = outline_lap_pos(laps, pos_by_number)
+    rotation, corners = session.circuit()
     frame = Frame(lap_pos["X"].to_numpy(), lap_pos["Y"].to_numpy(), rotation)
     drv_by_number = {r["num"]: r["drv"] for r in results}
-    pos = {drv_by_number[n]: p for n, p in session.pos_data.items() if n in drv_by_number}
+    pos = {drv_by_number[n]: p for n, p in pos_by_number.items() if n in drv_by_number}
     end_times = laps.groupby("Driver")["Time"].max().dt.total_seconds().to_dict()
     lap_ends = laps.groupby("LapNumber")["Time"].min().dt.total_seconds()
     lap1 = laps[laps["LapNumber"] == 1]
@@ -277,7 +262,7 @@ def _circuit_and_replay(session, results: list[dict]) -> tuple[dict, dict]:
 
     circuit = compute_circuit(lap_pos, corners, frame)
     grid = replay["t0"] + np.arange(replay["n"]) * replay["dt"]
-    # FastF1 positions are in tenths of a metre: 300 m ahead of the leader.
+    # Positions are in tenths of a metre: 300 m ahead of the leader.
     ahead = 300 * 10 * frame.scale
     replay["sc"] = safety_car_track(
         circuit["path"],

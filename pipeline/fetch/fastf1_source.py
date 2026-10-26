@@ -4,18 +4,15 @@ import shutil
 from pathlib import Path
 
 import fastf1
-from fastf1.core import Session
+
+from pipeline.fetch import openf1
 
 
-def load_session(season: int, round_: int, name: str, cache_dir: Path) -> Session:
-    """name: FastF1 session name ("Race", "Sprint", "Qualifying", "Practice 1", ...)."""
+def prepare_cache(cache_dir: Path) -> None:
+    """FastF1 still serves the calendar and Jolpica; OpenF1 responses go in the same folder."""
     cache_dir.mkdir(parents=True, exist_ok=True)
     fastf1.Cache.enable_cache(str(cache_dir))
-    session = fastf1.get_session(season, round_, name)
-    # Telemetry brings car data and positions (best laps, track map, replay): about 120 MB of
-    # temporary cache per session. Messages flag deleted laps.
-    session.load(telemetry=True, weather=True, messages=True)
-    return session
+    openf1.use_cache(cache_dir)
 
 
 def purge_cache(cache_dir: Path) -> None:

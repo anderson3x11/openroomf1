@@ -51,7 +51,7 @@
 		'Most overtakes',
 		overtaker?.[0],
 		overtaker ? String(overtaker[1]) : '',
-		overtaker ? `${byDrv.get(overtaker[0])?.name ?? ''}, official F1 data` : ''
+		overtaker ? `${byDrv.get(overtaker[0])?.name ?? ''}, F1 timing data` : ''
 	)}
 </dl>
 

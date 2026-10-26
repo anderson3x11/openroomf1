@@ -30,25 +30,29 @@ def _push(part: pd.DataFrame | None) -> pd.DataFrame:
 
 def compute_quali(parts: list[pd.DataFrame | None], results: pd.DataFrame) -> list[dict]:
     """One row per driver: best time in each segment reached, in classification order.
-    Official positions when FastF1 has them, else furthest segment reached, then time in it."""
+    Official positions when the source has them, else furthest segment reached, then time in
+    it. Drivers without an official position (retired, "RT") come after the classified ones."""
     pushes = [_push(p) for p in parts]
     best = [p[~p["Deleted"]].groupby("Driver")["LapTime"].min().dt.total_seconds() for p in pushes]
     rows = []
     for r in results.itertuples():
         q = [round(b[r.Abbreviation], 3) if r.Abbreviation in b else None for b in best]
-        pos = None if pd.isna(r.Position) else int(r.Position)
-        rows.append({**identity(r), "pos": pos, "q": q})
-    if all(row["pos"] is not None for row in rows):
-        return sorted(rows, key=lambda row: row["pos"])
+        pos = pd.to_numeric(r.Position, errors="coerce")
+        rows.append({**identity(r), "pos": None if pd.isna(pos) else int(pos), "q": q})
 
     def furthest(row):  # later segment first, then faster in it, no time last
         times = [(i, t) for i, t in enumerate(row["q"]) if t is not None]
         return (-times[-1][0], times[-1][1]) if times else (1, 0)
 
-    rows.sort(key=furthest)
-    for i, row in enumerate(rows, start=1):
+    official = sorted((r for r in rows if r["pos"] is not None), key=lambda r: r["pos"])
+    others = sorted((r for r in rows if r["pos"] is None), key=furthest)
+    if not official:  # sprint qualifying before 2026 sources, or no classification yet
+        for i, row in enumerate(others, start=1):
+            row["pos"] = i
+        return others
+    for i, row in enumerate(others, start=official[-1]["pos"] + 1):
         row["pos"] = i
-    return rows
+    return official + others
 
 
 def compute_quali_laps(parts: list[pd.DataFrame | None]) -> dict:

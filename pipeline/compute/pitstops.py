@@ -10,22 +10,20 @@ def _pos(by_lap: pd.Series, lap: int) -> int | None:
     return None if value is None or pd.isna(value) else int(value)
 
 
-def _stationary_times(feed: dict, drv_by_number: dict[str, str]) -> dict[tuple[str, int], float]:
-    """(DRV, lap) -> stationary time in seconds, from the live timing PitStopSeries feed."""
-    out = {}
-    for number, stops in feed.get("PitTimes", {}).items():
-        for s in stops:
-            stop = s.get("PitStop", {})
-            try:
-                out[(drv_by_number[number], int(stop["Lap"]))] = float(stop["PitStopTime"])
-            except (KeyError, ValueError):
-                continue
-    return out
+def _stationary_times(
+    pits: list[dict], drv_by_number: dict[str, str]
+) -> dict[tuple[str, int], float]:
+    """(DRV, lap) -> stationary time in seconds, from OpenF1 pit records (often missing)."""
+    return {
+        (drv_by_number[str(p["driver_number"])], int(p["lap_number"])): float(p["stop_duration"])
+        for p in pits
+        if p.get("stop_duration") is not None and str(p["driver_number"]) in drv_by_number
+    }
 
 
-def compute_pitstops(laps: pd.DataFrame, feed: dict, results: list[dict]) -> list[dict]:
-    """feed: PitStopSeries keyframe ({} when unavailable), results: compute_results output."""
-    stationary = _stationary_times(feed, {r["num"]: r["drv"] for r in results})
+def compute_pitstops(laps: pd.DataFrame, pits: list[dict], results: list[dict]) -> list[dict]:
+    """pits: OpenF1 pit records, results: compute_results output."""
+    stationary = _stationary_times(pits, {r["num"]: r["drv"] for r in results})
     stops = []
     for drv, grp in laps.dropna(subset=["LapNumber"]).groupby("Driver"):
         grp = grp.set_index(grp["LapNumber"].astype(int))

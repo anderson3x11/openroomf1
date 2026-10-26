@@ -10,6 +10,9 @@
 	}: { stops: PitStop[]; results: ResultRow[]; logos: Record<string, string> } = $props();
 
 	const byDrv = $derived(new Map(results.map((r) => [r.drv, r])));
+	// Stationary times came from the F1 archive: Grands Prix published since its login wall
+	// (October 2026) have none, so the column only shows when there is something in it.
+	const hasStop = $derived(stops.some((s) => s.stop !== null));
 	// Positions gained through the stop: before minus after (lower is better).
 	const delta = (s: PitStop) => (s.before !== null && s.after !== null ? s.before - s.after : null);
 </script>
@@ -18,7 +21,8 @@
 	<table class="data">
 		<thead>
 			<tr class="label">
-				<th class="num">LAP</th><th>DRIVER</th><th class="num" title="Official stationary time">STOP</th>
+				<th class="num">LAP</th><th>DRIVER</th>
+				{#if hasStop}<th class="num" title="Official stationary time">STOP</th>{/if}
 				<th class="num">PIT LANE</th>
 				<th class="num">BEFORE</th><th class="num">AFTER</th><th class="num">+/-</th><th></th>
 			</tr>
@@ -29,7 +33,7 @@
 				<tr>
 					<td class="num">{s.lap}</td>
 					<td><TeamMark src={r && logos[r.tid]} color={r?.color} team={r?.team ?? ''} /><b>{s.drv}</b></td>
-					<td class="num">{s.stop === null ? '' : `${s.stop.toFixed(1)}s`}</td>
+					{#if hasStop}<td class="num">{s.stop === null ? '' : `${s.stop.toFixed(1)}s`}</td>{/if}
 					<td class="num muted">{s.lane.toFixed(1)}s</td>
 					<td class="num">{s.before ?? ''}</td>
 					<td class="num">{s.after ?? ''}</td>

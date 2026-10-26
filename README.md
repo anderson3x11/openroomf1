@@ -20,16 +20,16 @@ Everything is computed ahead of time: the browser only reads pre-rendered pages,
 
 ## Stack
 
-- **Pipeline**: Python, FastF1, pandas, NumPy.
+- **Pipeline**: Python, OpenF1, pandas, NumPy.
 - **Site**: SvelteKit (static build), ECharts.
 - **Hosting**: Caddy in a Docker container, deployed with Coolify.
 
 ## Sources
 
-- [FastF1](https://github.com/theOehrly/Fast-F1): timing, laps, stints, track status, race control messages, car positions.
-- [Jolpica-F1](https://github.com/jolpica/jolpica-f1): championship standings, circuits.
-- [OpenF1](https://openf1.org): team radio metadata.
-- F1 live timing archive: official overtakes and pit stop times.
+- [OpenF1](https://openf1.org): timing, laps, tyre stints, pit stops, race control messages, weather, overtakes, car positions, telemetry, team radios.
+- [Jolpica-F1](https://github.com/jolpica/jolpica-f1): classification, starting grid, championship standings, circuits.
+- [FastF1](https://github.com/theOehrly/Fast-F1): calendar. It was the timing source until October 2026, when the F1 live timing archive started to require an F1 TV login; the Grands Prix published before keep its data, official pit stop times included.
+- Track maps: rotation and corners from MultiViewer.
 - Formula 1 YouTube channel: official highlights.
 - [flag-icons](https://github.com/lipis/flag-icons) (MIT): country flags.
 - Team logos from formula1.com. Logos and names belong to their owners.

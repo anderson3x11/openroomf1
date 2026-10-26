@@ -54,7 +54,7 @@
 </script>
 
 {#if failed}
-	<p class="label empty">[ NO TELEMETRY ] FastF1 has no car data for this session.</p>
+	<p class="label empty">[ NO TELEMETRY ] No car data for this session.</p>
 {:else if !tel}
 	<p class="label empty">[ LOADING TELEMETRY ]</p>
 {:else}
