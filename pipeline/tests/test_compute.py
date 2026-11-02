@@ -153,6 +153,13 @@ def test_events(messages):
     assert out["neutral"] == [{"kind": "sc", "from": 31, "to": 32}]
 
 
+def test_events_openf1_wording():
+    """OpenF1 writes "VSC DEPLOYED", and a stopped race can be only "SESSION ABORTED"."""
+    rows = [("SafetyCar", None, "VSC DEPLOYED"), ("SessionStatus", None, "SESSION ABORTED")]
+    messages = pd.DataFrame(rows, columns=["Category", "Flag", "Message"]).assign(Lap=[7, 45])
+    assert [m["kind"] for m in compute_events(messages, {})["msgs"]] == ["vsc", "red"]
+
+
 def test_standings(standings, results):
     out = compute_standings(**standings, results=compute_results(results))
     rus = next(d for d in out["drivers"] if d["drv"] == "RUS")

@@ -53,7 +53,13 @@ def neutral_intervals(messages: pd.DataFrame, lap_ends: pd.Series) -> list[tuple
             elif "IN THIS LAP" in msg and SC in open_:
                 later = ends[ends > np.datetime64(m.Date)]
                 out.append((open_.pop(SC), pd.Timestamp(later[0]) if len(later) else m.Date, SC))
-        elif m.Flag == "RED" and m.Scope == "Track":
+        elif (m.Flag == "RED" and m.Scope == "Track") or (
+            m.Category == "SessionStatus" and "ABORTED" in msg  # Mexico 2026: no RED flag sent
+        ):
+            # A red flag ends the safety car or VSC that preceded it.
+            for code in (SC, VSC):
+                if code in open_:
+                    out.append((open_.pop(code), m.Date, code))
             open_.setdefault(RED, m.Date)
         elif RED in open_ and (
             (m.Flag == "GREEN" and m.Scope == "Track") or "RESUMED" in msg or "STARTED" in msg

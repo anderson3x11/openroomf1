@@ -3,7 +3,7 @@ from datetime import date
 import pandas as pd
 import pytest
 
-from pipeline.cli import event_sessions, latest_round, parse_args
+from pipeline.cli import event_sessions, latest_round, parse_args, previous_highlights
 
 
 def test_run_args():
@@ -49,3 +49,13 @@ def test_event_sessions():
         "quali",
         "race",
     ]
+
+
+def test_previous_highlights(tmp_path):
+    gp = tmp_path / "2026" / "18-united-states"
+    gp.mkdir(parents=True)
+    (gp / "meta.json").write_text(
+        '{"name": "United States Grand Prix", "highlights": "srLm23RUAH0"}'
+    )
+    assert previous_highlights(tmp_path, 2026, "United States Grand Prix") == "srLm23RUAH0"
+    assert previous_highlights(tmp_path, 2026, "Mexico City Grand Prix") is None

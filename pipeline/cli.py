@@ -1,6 +1,7 @@
 """Pipeline entry point: `python -m pipeline run --season 2026 --round 15`."""
 
 import argparse
+import json
 from datetime import date
 from pathlib import Path
 
@@ -136,7 +137,10 @@ def run(args: argparse.Namespace) -> None:
         "date": event["EventDate"].strftime("%Y-%m-%d"),
         "sessions": [f for f, _ in event_sessions(event) if f in done],
         **load_circuit(args.season, args.round),
-        "highlights": find_highlights(args.season, args.round, event["EventName"]),
+        # The YouTube feed lists the last 15 videos only: when it no longer has this one, keep
+        # the video found when the Grand Prix was first published.
+        "highlights": find_highlights(args.season, args.round, event["EventName"])
+        or previous_highlights(args.data_dir, args.season, event["EventName"]),
     }
     gp_dir = write_gp(args.data_dir, meta, files)
 
@@ -149,6 +153,15 @@ def run(args: argparse.Namespace) -> None:
         print("WARNING: over budget, review resampling")
     if not args.keep_cache:
         purge_cache(args.cache_dir)
+
+
+def previous_highlights(data_dir: Path, season: int, event_name: str) -> str | None:
+    """Highlights video id already in the published meta.json of this Grand Prix, if any."""
+    for meta in (data_dir / str(season)).glob("*/meta.json"):
+        data = json.loads(meta.read_text(encoding="utf-8"))
+        if data.get("name") == event_name:
+            return data.get("highlights")
+    return None
 
 
 def race_files(session, folder: str, standings: dict | None = None) -> dict:
@@ -205,7 +218,7 @@ def telemetry_of(session) -> dict | None:
     for lap in best_laps(session.laps).itertuples():
         try:
             data = session.telemetry(session.laps.loc[lap.Index])
-        except (KeyError, ValueError) as e:
+        except (KeyError, ValueError, OSError) as e:  # OSError: OpenF1 server error on a lap
             print(f"WARNING: no telemetry for {lap.Driver}: {e!r}")
             continue
         if len(data) < 100:
@@ -237,7 +250,7 @@ def circuit_and_replay(session, results: list[dict]) -> tuple[dict | None, dict 
     Both None when position data is unusable: the rest of the GP is still exported."""
     try:
         return _circuit_and_replay(session, results)
-    except (KeyError, ValueError) as e:
+    except (KeyError, ValueError, OSError) as e:
         print(f"WARNING: no circuit outline nor replay: {e!r}")
         return None, None
 

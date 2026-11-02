@@ -221,3 +221,23 @@ def test_deleted_lap_matched_on_its_time():
     )
     df = laps_frame(laps, DRIVERS, [], [], [], messages, T0)
     assert df["Deleted"].tolist() == [False, True, False]
+
+
+def test_red_flag_from_session_aborted():
+    """Mexico 2026: safety car, then the race stopped ("SESSION ABORTED", no RED flag), restart,
+    and a second safety car later. The first one must end at the red flag."""
+    messages = messages_frame(
+        [
+            msg(100, "SAFETY CAR DEPLOYED", "SafetyCar"),
+            msg(200, "SESSION ABORTED", "SessionStatus"),
+            msg(2500, "SESSION STARTED", "SessionStatus"),
+            msg(3500, "SAFETY CAR DEPLOYED", "SafetyCar"),
+            msg(3800, "SAFETY CAR IN THIS LAP", "SafetyCar"),
+        ]
+    )
+    lap_ends = T0 + pd.to_timedelta(pd.Series([3850, 3900]), unit="s")
+    spans = [
+        ((a - T0).total_seconds(), (b - T0).total_seconds(), c)
+        for a, b, c in neutral_intervals(messages, lap_ends)
+    ]
+    assert spans == [(100, 200, "4"), (200, 2500, "5"), (3500, 3850, "4")]

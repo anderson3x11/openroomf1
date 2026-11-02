@@ -44,7 +44,8 @@ def get(endpoint: str, **params) -> list[dict]:
             if e.code == 404:
                 data = []
                 break
-            if e.code == 429 and attempt < 4:  # over the limit anyway: wait and retry
+            # Over the limit anyway (429), or a passing server error (500 seen in Mexico 2026).
+            if (e.code == 429 or e.code >= 500) and attempt < 4:
                 time.sleep(20 * (attempt + 1))
                 continue
             raise

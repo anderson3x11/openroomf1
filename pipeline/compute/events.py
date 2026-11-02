@@ -10,9 +10,9 @@ DRIVER_CODE = re.compile(r"\(([A-Z]{3})\)")
 
 
 def classify(category: str, flag, message: str) -> str | None:
-    if category == "SafetyCar":
-        return "vsc" if "VIRTUAL" in message else "sc"
-    if flag == "RED":
+    if category == "SafetyCar":  # FastF1 wrote "VIRTUAL SAFETY CAR", OpenF1 writes "VSC"
+        return "vsc" if "VIRTUAL" in message or message.startswith("VSC") else "sc"
+    if flag == "RED" or (category == "SessionStatus" and "ABORTED" in message):
         return "red"
     if flag == "CHEQUERED":
         return "finish"
