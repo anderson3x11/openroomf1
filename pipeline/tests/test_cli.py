@@ -16,6 +16,7 @@ def test_run_latest_args():
     assert args.latest and args.round is None
     with pytest.raises(SystemExit):  # one or the other, not both
         parse_args(["run", "--season", "2026", "--round", "3", "--latest"])
+    assert parse_args(["run", "--season", "2026", "--previous"]).previous
 
 
 def test_latest_round():

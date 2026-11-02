@@ -47,12 +47,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     run.add_argument("--season", type=int, required=True)
     which = run.add_mutually_exclusive_group(required=True)
     which.add_argument("--round", type=int)
+    which.add_argument("--latest", action="store_true", help="Most recent race already held")
     which.add_argument(
-        "--latest", action="store_true", help="Most recent race already held (for the cron job)"
+        "--previous",
+        action="store_true",
+        help="The race before the latest: OpenF1 fills its pit stop times days after the race",
     )
     run.add_argument("--data-dir", type=Path, default=ROOT / "data")
     run.add_argument("--cache-dir", type=Path, default=ROOT / "cache")
-    run.add_argument("--keep-cache", action="store_true", help="Do not purge the FastF1 cache")
+    run.add_argument("--keep-cache", action="store_true", help="Do not purge the cache")
     return parser.parse_args(argv)
 
 
@@ -92,13 +95,14 @@ def run(args: argparse.Namespace) -> None:
     from pipeline.fetch.youtube import fetch_thumbnail, find_highlights
 
     prepare_cache(args.cache_dir)
-    if args.latest:
+    if args.latest or args.previous:
         schedule = fastf1.get_event_schedule(args.season, include_testing=False)
-        args.round = latest_round(schedule, date.today())
-        if args.round is None:
-            print(f"No {args.season} race held yet")
+        latest = latest_round(schedule, date.today())
+        args.round = latest - 1 if args.previous and latest else latest
+        if not args.round:
+            print(f"No {args.season} race to process")
             return
-        print(f"Latest race: {args.season} round {args.round}")
+        print(f"{'Previous' if args.previous else 'Latest'} race: {args.season} round {args.round}")
 
     # Timing comes from OpenF1 (the F1 archive needs an F1 TV login since October 2026).
     # The race is required: without it nothing is written. Other sessions are a bonus.
