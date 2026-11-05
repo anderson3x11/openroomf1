@@ -434,6 +434,7 @@ def results_frame(
         if d is None:
             continue
         o = by_number.get(n)
+        rank = o["position"] if o else r.get("position")
         if o:
             cls, grid, status, points = o["positionText"], o["grid"], o["status"], o["points"]
         else:
@@ -447,7 +448,9 @@ def results_frame(
                 "FullName": f"{d.get('first_name', '')} {d.get('last_name', '')}".strip(),
                 "TeamName": d.get("team_name"),
                 "TeamColor": d.get("team_colour"),
-                "Position": r.get("position") if r.get("position") is not None else np.nan,
+                # Order and printed position from one source: OpenF1 and Jolpica can disagree
+                # for days after a penalty.
+                "Position": rank if rank is not None else np.nan,
                 "ClassifiedPosition": cls,
                 "GridPosition": grid,
                 "Status": status,
