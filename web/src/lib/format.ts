@@ -1,4 +1,4 @@
-import type { Session } from '#lib/types.ts';
+import type { RaceEvents, Session } from '#lib/types.ts';
 
 /** +3, -2, 0. Empty when unknown. */
 export const signed = (n: number | null) => (n === null ? '' : n > 0 ? `+${n}` : String(n));
@@ -64,3 +64,19 @@ export const SESSION_LABELS: Record<Session, string> = {
 	race: 'Race'
 };
 export const sessionPath = (s: Session) => (s === 'race' ? '' : `/${s}`);
+
+const NEUTRAL_LABELS = { sc: 'SC', vsc: 'VSC', red: 'RED FLAG' };
+
+/** Back-to-back neutralizations share one label: side by side, theirs would run together. */
+export function joinNeutralSpans(spans: RaceEvents['neutral']) {
+	const joined: { from: number; to: number; label: string }[] = [];
+	for (const s of spans) {
+		const last = joined.at(-1);
+		const label = NEUTRAL_LABELS[s.kind];
+		if (last && s.from === last.to + 1) {
+			last.to = s.to;
+			last.label += ` / ${label}`;
+		} else joined.push({ from: s.from, to: s.to, label });
+	}
+	return joined;
+}

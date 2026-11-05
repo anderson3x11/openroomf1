@@ -128,6 +128,21 @@ def test_laps_frame():
     assert df.loc[5, "Deleted"] and not df.loc[2, "Deleted"]
 
 
+def test_lap_skipped_by_openf1_comes_back_empty():
+    laps = [lap(1, 0, 90), lap(2, 90, 90), lap(4, 270, 90), lap(5, 360, 90)]
+    positions = [
+        {"driver_number": 1, "date": at(0), "position": 3},
+        {"driver_number": 1, "date": at(200), "position": 2},
+    ]
+    df = laps_frame(laps, DRIVERS, [], [], positions, messages_frame([]), T0).set_index("LapNumber")
+
+    assert list(df.index) == [1, 2, 3, 4, 5]
+    assert df.loc[2, "Time"] == pd.to_timedelta(180, unit="s")
+    assert df.loc[3, "Time"] == pd.to_timedelta(270, unit="s")
+    assert pd.isna(df.loc[3, "LapTime"])  # never invented
+    assert df.loc[3, "Position"] == 2
+
+
 def test_qualifying_parts():
     laps = pd.DataFrame({"Time": pd.to_timedelta([100, 1200, 1300, 2500], unit="s")})
     messages = messages_frame(

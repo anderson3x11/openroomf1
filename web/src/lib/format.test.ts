@@ -1,6 +1,6 @@
 // Run with: node --experimental-strip-types src/lib/format.test.ts
 import assert from 'node:assert/strict';
-import { officialTitle, shortCircuit, shortName } from './format.ts';
+import { joinNeutralSpans, officialTitle, shortCircuit, shortName } from './format.ts';
 
 const cases: [string, string][] = [
 	['Circuit Park Zandvoort', 'Zandvoort'],
@@ -31,3 +31,15 @@ assert.equal(shortName('Dutch Grand Prix'), 'Dutch');
 assert.equal(officialTitle('FORMULA 1 HEINEKEN DUTCH GRAND PRIX 2026', 'x'), 'HEINEKEN DUTCH GRAND PRIX');
 
 console.log('format ok');
+
+assert.deepEqual(
+	joinNeutralSpans([
+		{ kind: 'vsc', from: 7, to: 8 },
+		{ kind: 'sc', from: 44, to: 44 },
+		{ kind: 'red', from: 45, to: 46 }
+	]),
+	[
+		{ from: 7, to: 8, label: 'VSC' },
+		{ from: 44, to: 46, label: 'SC / RED FLAG' }
+	]
+);
