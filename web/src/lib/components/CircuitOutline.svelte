@@ -7,7 +7,7 @@
 </script>
 
 <svg viewBox="0 0 {circuit.w} {circuit.h}" role="img" aria-label={label}>
-	{#key points}<polygon {points} pathLength="1" />{/key}
+	<polygon {points} />
 </svg>
 
 <style>
@@ -22,21 +22,5 @@
 		stroke-width: 10;
 		stroke-linejoin: round;
 		opacity: 0.9;
-		stroke-dasharray: 1;
-		animation: draw 1100ms var(--ease-in-out) both;
-	}
-	/* Arriving on a Grand Prix: the track draws itself, once. */
-	@keyframes draw {
-		from {
-			stroke-dashoffset: 1;
-		}
-		to {
-			stroke-dashoffset: 0;
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		polygon {
-			animation: none;
-		}
 	}
 </style>

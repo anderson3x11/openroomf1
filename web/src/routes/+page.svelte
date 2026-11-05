@@ -20,8 +20,8 @@
 			<h1>{season}</h1>
 		</header>
 		<ol class="gps">
-			{#each gps as gp, i (gp.round)}
-				<li style:--i={i}>
+			{#each gps as gp (gp.round)}
+				<li>
 					<a href="/{season}/{gp.slug}">
 						<span class="top">
 							<span class="label">R{String(gp.round).padStart(2, '0')}</span>
@@ -114,6 +114,9 @@
 		}
 		a:hover :is(.label, .venue) {
 			color: inherit;
+		}
+		a:hover :global(.flag) {
+			outline-color: var(--on-accent);
 		}
 	}
 </style>

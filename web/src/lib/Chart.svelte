@@ -47,17 +47,9 @@
 		};
 	});
 
-	// Filters rebuild the option: replace it without recreating the chart. The lines draw
-	// themselves when the chart opens only: a filter must not replay it.
-	let opened = false;
+	// Filters rebuild the option: replace it without recreating the chart.
 	$effect(() => {
-		if (!chart) return;
-		const reveal = !opened && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-		chart.setOption(
-			reveal ? { ...option, animation: true, animationDuration: 700, animationEasing: 'cubicOut' } : option,
-			{ notMerge: true }
-		);
-		opened = true;
+		chart?.setOption(option, { notMerge: true });
 	});
 
 	// Screenshots: no zoom slider, but the zoom itself is kept (merged, not replaced).

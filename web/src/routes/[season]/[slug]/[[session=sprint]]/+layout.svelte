@@ -130,7 +130,6 @@
 	.tabs a[aria-current='page'] {
 		color: var(--on-accent);
 		background: var(--accent);
-		view-transition-name: active-tab;
 	}
 	.count {
 		font: 500 12px var(--mono);

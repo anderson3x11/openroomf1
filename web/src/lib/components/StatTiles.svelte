@@ -93,6 +93,14 @@
 		width: 32px;
 		margin-right: 12px;
 	}
+	/* Logos are chosen for the panels of the theme: on red, they keep a disc of that color. */
+	.tiles > div:nth-child(2) .big :global(img) {
+		box-sizing: content-box;
+		padding: 6px;
+		margin: -6px 8px -6px 0;
+		background: var(--panel);
+		border-radius: 50%;
+	}
 	.value {
 		margin-left: auto;
 		color: var(--ink);

@@ -15,8 +15,6 @@
 	--mono: 'Figtree', system-ui, sans-serif;
 	--gap: 10px;
 	--radius: 22px;
-	--ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-	--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 	color-scheme: dark;
 }
 
@@ -70,11 +68,7 @@ button {
 	transition:
 		color 150ms ease,
 		background-color 150ms ease,
-		border-color 150ms ease,
-		transform 120ms var(--ease-out);
-}
-button:active {
-	transform: scale(0.97);
+		border-color 150ms ease;
 }
 
 body {
@@ -158,66 +152,5 @@ table.data .num {
 @media (max-width: 900px) {
 	.panels {
 		grid-template-columns: minmax(0, 1fr);
-	}
-}
-
-/* Motion. Content arrives once, quickly; nothing moves while it is being read. */
-@keyframes rise {
-	from {
-		opacity: 0;
-		transform: translateY(8px);
-	}
-}
-@keyframes fade {
-	from {
-		opacity: 0;
-	}
-}
-.panels > *,
-.tiles > *,
-.gps > li {
-	animation: rise 260ms var(--ease-out) backwards;
-}
-.panels > :nth-child(2),
-.tiles > :nth-child(2) {
-	animation-delay: 50ms;
-}
-.panels > :nth-child(3),
-.tiles > :nth-child(3) {
-	animation-delay: 100ms;
-}
-.panels > :nth-child(n + 4),
-.tiles > :nth-child(n + 4) {
-	animation-delay: 150ms;
-}
-.gps > li {
-	animation-delay: calc(min(var(--i, 0), 12) * 30ms);
-}
-
-/* Tab change: a short crossfade, the red pill slides from the old tab to the new one. */
-::view-transition-old(root),
-::view-transition-new(root) {
-	animation-duration: 140ms;
-	animation-timing-function: var(--ease-out);
-}
-::view-transition-group(active-tab) {
-	animation-duration: 220ms;
-	animation-timing-function: var(--ease-in-out);
-}
-
-/* A panel image is the finished view, whatever was animating. */
-.capturing,
-.capturing * {
-	animation: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.panels > *,
-	.tiles > *,
-	.gps > li {
-		animation-name: fade;
-	}
-	button:active {
-		transform: none;
 	}
 }

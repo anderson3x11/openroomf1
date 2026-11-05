@@ -26,8 +26,8 @@
 </script>
 
 <ol class="rows">
-	{#each rows as { driver, segments, marks, last }, i (driver.drv)}
-		<li style:--i={i}>
+	{#each rows as { driver, segments, marks, last } (driver.drv)}
+		<li>
 			<span class="name" title={driver.name}
 				><span class="full">{lastName(driver.name)}</span><span class="code">{driver.drv}</span></span
 			>
@@ -97,22 +97,6 @@
 		position: relative;
 		height: 100%;
 		margin: 0 14px;
-		animation: sweep 650ms var(--ease-out) backwards;
-		animation-delay: calc(var(--i) * 22ms);
-	}
-	/* The race runs from left to right, one driver after the other. */
-	@keyframes sweep {
-		from {
-			clip-path: inset(-16px 100% -16px -16px);
-		}
-		to {
-			clip-path: inset(-16px -16px -16px -16px);
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.track {
-			animation: none;
-		}
 	}
 	.bar {
 		position: absolute;

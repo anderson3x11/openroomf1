@@ -89,6 +89,9 @@
 		flex-wrap: wrap;
 		gap: 8px;
 	}
+	nav {
+		color: inherit;
+	}
 	nav a {
 		color: inherit;
 		text-decoration: none;
@@ -99,7 +102,7 @@
 		padding: 6px 12px;
 	}
 	.step[aria-disabled='true'] {
-		opacity: 0.45;
+		opacity: 0.6;
 		pointer-events: none;
 	}
 	select {
@@ -137,12 +140,15 @@
 		margin: 10px 0 0;
 		color: inherit;
 	}
+	/* Many flags are red: the outline keeps them off the banner. */
+	.meta :global(.flag) {
+		outline-color: var(--on-accent);
+	}
 	h1 {
 		font: 800 clamp(2.4rem, 5.4vw, 5.2rem) / 0.98 var(--sans);
 		letter-spacing: -0.02em;
 		text-transform: uppercase;
 		margin: 14px 0 0;
-		animation: rise 320ms var(--ease-out) backwards;
 	}
 	h1 span {
 		color: #16060a;
@@ -169,11 +175,6 @@
 		}
 		.sessions a[aria-current='page']:hover {
 			background: var(--on-accent);
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		h1 {
-			animation-name: fade;
 		}
 	}
 	@media (max-width: 700px) {
