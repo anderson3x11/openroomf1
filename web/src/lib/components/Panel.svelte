@@ -36,7 +36,7 @@
 	const clip = () => shoot(copy, 'COPIED');
 </script>
 
-<section class="panel" class:wide bind:this={el}>
+<section class="panel" class:wide class:capturing bind:this={el}>
 	{#if capturing}<div class="label caption">{race.shot.caption}</div>{/if}
 	<header>
 		<div>
@@ -65,6 +65,10 @@
 	}
 	.wide {
 		grid-column: 1 / -1;
+	}
+	/* In the page grid a panel stretches to its neighbor: an image keeps its own height. */
+	.capturing {
+		align-self: start;
 	}
 	header {
 		display: flex;
