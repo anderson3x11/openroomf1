@@ -142,6 +142,7 @@
 		letter-spacing: -0.02em;
 		text-transform: uppercase;
 		margin: 14px 0 0;
+		animation: rise 320ms var(--ease-out) backwards;
 	}
 	h1 span {
 		color: #16060a;
@@ -168,6 +169,11 @@
 		}
 		.sessions a[aria-current='page']:hover {
 			background: var(--on-accent);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		h1 {
+			animation-name: fade;
 		}
 	}
 	@media (max-width: 700px) {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onNavigate } from '$app/navigation';
 	import favicon from '#lib/assets/favicon.svg';
 	import { cycleTheme, initTheme, ui } from '#lib/ui.svelte.ts';
 	import '../app.css';
@@ -7,6 +8,18 @@
 	let { children }: LayoutProps = $props();
 
 	$effect(() => initTheme());
+
+	// Page changes go through a view transition where the browser has it.
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+		if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 
 	const THEME_LABELS = { auto: 'AUTO', light: 'LIGHT', dark: 'DARK' };
 </script>

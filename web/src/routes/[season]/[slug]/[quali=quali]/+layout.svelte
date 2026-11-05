@@ -118,6 +118,7 @@
 	.tabs a[aria-current='page'] {
 		color: var(--on-accent);
 		background: var(--accent);
+		view-transition-name: active-tab;
 	}
 	@media (hover: hover) {
 		.tabs a:hover {

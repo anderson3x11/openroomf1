@@ -87,7 +87,7 @@
 							{#each selected as d, i (d)}
 								{@const lap = tel.laps[d]}
 								<tr>
-									<td><span class="swatch" style:background={colors[d]}></span><b>{d}</b> {byDrv.get(d)?.name ?? ''}</td>
+									<td><span class="swatch" style:background={colors[d]}></span><b class="drv">{d}</b><span class="drv-name">{byDrv.get(d)?.name ?? ''}</span></td>
 									<td class="num">{lap.lap}</td>
 									<td class="num">{formatLap(lap.time)}</td>
 									<td class="num muted">{i ? `+${(lap.time - tel.laps[selected[0]].time).toFixed(3)}` : 'REF'}</td>

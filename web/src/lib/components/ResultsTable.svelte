@@ -32,7 +32,7 @@
 			{#each results as r (r.drv)}
 				<tr style:--team={r.color}>
 					<td class="num">{r.cls}</td>
-					<td><TeamMark src={logos[r.tid]} color={r.color} team={r.team} /><b>{r.drv}</b> {r.name}</td>
+					<td><TeamMark src={logos[r.tid]} color={r.color} team={r.team} /><b class="drv">{r.drv}</b><span class="drv-name">{r.name}</span></td>
 					<td class="muted">{r.team}</td>
 					<td class="num">{r.grid ?? 'PIT'}</td>
 					<td class="num {trend(r.gain)}">{signed(r.gain)}</td>
