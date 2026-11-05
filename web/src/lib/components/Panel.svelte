@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tag, ui } from '#lib/ui.svelte.ts';
 	import { tick, type Snippet } from 'svelte';
 	import { capture } from '#lib/capture.svelte.ts';
 	import { getRace } from '#lib/race.ts';
@@ -36,19 +37,19 @@
 	const clip = () => shoot(copy, 'COPIED');
 </script>
 
-<section class="panel" class:wide bind:this={el}>
+<section class="panel" class:wide class:capturing bind:this={el}>
 	{#if capturing}<div class="label caption">{race.shot.caption}</div>{/if}
 	<header>
 		<div>
-			<h2>// {title}</h2>
+			<h2>{ui.da ? title : `// ${title}`}</h2>
 			{#if desc && !capturing}<p>{desc}</p>{/if}
 		</div>
 		<div class="actions" data-noshot>
 			{#if actions}{@render actions()}{/if}
 			<span class="shot label">
 				{#if status}{status}{:else}
-					<button onclick={save} title="Save this panel as a PNG image">[ PNG ]</button>
-					<button onclick={clip} title="Copy this panel as an image">[ COPY ]</button>
+					<button onclick={save} title="Save this panel as a PNG image">{tag('PNG')}</button>
+					<button onclick={clip} title="Copy this panel as an image">{tag('COPY')}</button>
 				{/if}
 			</span>
 		</div>
@@ -65,6 +66,10 @@
 	}
 	.wide {
 		grid-column: 1 / -1;
+	}
+	/* In the page grid a panel stretches to its neighbor: an image keeps its own height. */
+	.capturing {
+		align-self: start;
 	}
 	header {
 		display: flex;

@@ -30,7 +30,7 @@
 		</thead>
 		<tbody>
 			{#each results as r (r.drv)}
-				<tr>
+				<tr style:--team={r.color}>
 					<td class="num">{r.cls}</td>
 					<td><TeamMark src={logos[r.tid]} color={r.color} team={r.team} /><b>{r.drv}</b> {r.name}</td>
 					<td class="muted">{r.team}</td>

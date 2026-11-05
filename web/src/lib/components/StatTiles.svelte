@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tag } from '#lib/ui.svelte.ts';
 	import { formatLap } from '#lib/stats.ts';
 	import type { ResultRow, Summary } from '#lib/types.ts';
 	import TeamMark from './TeamMark.svelte';
@@ -28,7 +29,7 @@
 
 {#snippet tile(label: string, drv: string | undefined, value: string, sub: string)}
 	<div>
-		<dt class="label">[ {label} ]</dt>
+		<dt class="label">{tag(label)}</dt>
 		{#if drv}
 			<dd class="big">{@render who(drv)}<span class="value">{value}</span></dd>
 			<dd class="sub">{sub}</dd>

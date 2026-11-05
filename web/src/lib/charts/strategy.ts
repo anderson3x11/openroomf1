@@ -51,6 +51,7 @@ export function strategyOption(
 					// The surface-colored border draws the gap between consecutive stints.
 					borderColor: tokens().surface,
 					borderWidth: 1,
+					borderRadius: tokens().bar,
 					decal: s.new === false ? USED : { symbol: 'none' }
 				},
 				label: { color: s.cmp === 'MEDIUM' || s.cmp === 'HARD' ? '#111111' : '#FFFFFF' }

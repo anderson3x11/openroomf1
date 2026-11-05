@@ -3,7 +3,7 @@
 	import FilterBar from '#lib/components/FilterBar.svelte';
 	import GpHeader from '#lib/components/GpHeader.svelte';
 	import { filtersFromParams, filtersSummary, filtersToParams, type Filters } from '#lib/filters.ts';
-	import { SESSION_LABELS } from '#lib/format.ts';
+	import { inkOn, SESSION_LABELS } from '#lib/format.ts';
 	import { setRace } from '#lib/race.ts';
 	import { ui } from '#lib/ui.svelte.ts';
 	import { readParams, writeParams } from '#lib/url.ts';
@@ -67,7 +67,7 @@
 	></svelte:head
 >
 
-<main>
+<main style:--win={data.results[0]?.color} style:--win-ink={inkOn(data.results[0]?.color ?? null)}>
 	<GpHeader meta={data.meta} season={data.season} circuit={data.circuit}
 		flag={data.meta.flag ? data.flags[data.meta.flag] : undefined}
 	/>

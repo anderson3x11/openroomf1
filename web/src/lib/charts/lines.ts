@@ -26,6 +26,7 @@ export function driverLines(
 	all: ResultRow[] = results
 ) {
 	const styles = lineStyles(all);
+	const dot = tokens().dot;
 	const rich = logoRich(logos, 12);
 	const tid = Object.fromEntries(results.map((r) => [r.drv, r.tid]));
 	const series = results.map((r, i) => {
@@ -35,8 +36,11 @@ export function driverLines(
 			name: r.drv,
 			type: 'line',
 			data: v.slice(0, last + 1).map((x, lap) => [lap, x]),
-			showSymbol: false,
-			lineStyle: { width: 2, ...styles[r.drv] },
+			// A dot at the end of the line where the art direction has one.
+			showSymbol: dot > 0,
+			symbol: (_: unknown, p: { dataIndex: number }) => (p.dataIndex === last ? 'circle' : 'none'),
+			symbolSize: dot,
+			lineStyle: { width: tokens().line, cap: 'round', join: 'round', ...styles[r.drv] },
 			itemStyle: { color: styles[r.drv].color },
 			endLabel: {
 				show: true,

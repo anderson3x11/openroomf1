@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tag } from '#lib/ui.svelte.ts';
 	import type { Filters } from '#lib/filters.ts';
 	import { tyreColor } from '#lib/tyres.ts';
 	import type { Driver, RaceEvents } from '#lib/types.ts';
@@ -75,7 +76,7 @@
 <div class="filters">
 	<div class="summary">
 		<button class="label toggle" aria-expanded={open} onclick={() => (open = !open)}>
-			[ FILTERS {open ? '-' : '+'} ]
+			{tag(`FILTERS ${open ? '-' : '+'}`)}
 		</button>
 		<span class="label state">
 			<b>{filters.drivers.size}/{allDrivers.length}</b> DRIVERS
@@ -83,7 +84,7 @@
 			<span aria-hidden="true">/</span> TYRES <b>{filters.compounds.size}/{compounds.length}</b>
 		</span>
 		{#if !isDefault}
-			<button class="label link" onclick={reset}>[ RESET ]</button>
+			<button class="label link" onclick={reset}>{tag('RESET')}</button>
 		{/if}
 	</div>
 
@@ -91,8 +92,8 @@
 		<div class="body">
 			<div class="row">
 				<span class="label title">DRIVERS</span>
-				<button class="label link" onclick={() => setDrivers(allDrivers)}>[ ALL ]</button>
-				<button class="label link" onclick={() => setDrivers([])}>[ NONE ]</button>
+				<button class="label link" onclick={() => setDrivers(allDrivers)}>{tag('ALL')}</button>
+				<button class="label link" onclick={() => setDrivers([])}>{tag('NONE')}</button>
 				<span class="hint">
 					Click: add or remove. Double click: isolate. Logo: whole team.
 				</span>
@@ -145,7 +146,7 @@
 						/></label
 					>
 					<button class="label link" onclick={() => (filters = { ...filters, laps: [1, totalLaps] })}
-						>[ ALL LAPS ]</button
+						>{tag('ALL LAPS')}</button
 					>
 				</div>
 				<div class="laps">

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tag } from '#lib/ui.svelte.ts';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { Circuit, GpMeta, GpSummary, SeasonIndex, Session } from '#lib/types.ts';
@@ -34,7 +35,7 @@
 
 <div class="head">
 	<nav class="label" aria-label="Grands Prix of the season">
-		<a href="/">[ {meta.season} ]</a>
+		<a href="/">{tag(meta.season)}</a>
 		<a class="step" href={prev ? href(prev) : undefined} aria-disabled={!prev} title={prev?.name}
 			>&lt; {prev ? short(prev.name) : ''}</a
 		>
@@ -55,7 +56,7 @@
 		<div>
 			<p class="label meta">
 				<Flag src={flag} country={meta.host ?? meta.country} size={26} />
-				[ {meta.season} / {round(meta.round)} ] {venue(meta)} / {meta.date}{laps ? ` / ${laps} LAPS` : ''}
+				{tag(`${meta.season} / ${round(meta.round)}`)} {venue(meta)} / {meta.date}{laps ? ` / ${laps} LAPS` : ''}
 			</p>
 			<h1>{short(meta.name)}<br /><span>Grand Prix</span></h1>
 			<p class="label official">{officialTitle(meta.official, meta.name)}</p>
