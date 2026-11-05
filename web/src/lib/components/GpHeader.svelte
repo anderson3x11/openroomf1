@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+		import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { Circuit, GpMeta, GpSummary, SeasonIndex, Session } from '#lib/types.ts';
 	import { officialTitle, SESSION_LABELS, sessionPath, venue } from '#lib/format.ts';
@@ -34,7 +34,7 @@
 
 <div class="head">
 	<nav class="label" aria-label="Grands Prix of the season">
-		<a href="/">[ {meta.season} ]</a>
+		<a href="/">{meta.season}</a>
 		<a class="step" href={prev ? href(prev) : undefined} aria-disabled={!prev} title={prev?.name}
 			>&lt; {prev ? short(prev.name) : ''}</a
 		>
@@ -55,7 +55,7 @@
 		<div>
 			<p class="label meta">
 				<Flag src={flag} country={meta.host ?? meta.country} size={26} />
-				[ {meta.season} / {round(meta.round)} ] {venue(meta)} / {meta.date}{laps ? ` / ${laps} LAPS` : ''}
+				{meta.season} / {round(meta.round)} / {venue(meta)} / {meta.date}{laps ? ` / ${laps} LAPS` : ''}
 			</p>
 			<h1>{short(meta.name)}<br /><span>Grand Prix</span></h1>
 			<p class="label official">{officialTitle(meta.official, meta.name)}</p>
@@ -77,7 +77,11 @@
 
 <style>
 	.head {
-		padding: 20px 0 16px;
+		color: var(--on-accent);
+		background: var(--accent);
+		border-radius: 28px;
+		margin: 12px 0 0;
+		padding: 20px 24px 22px;
 	}
 	nav {
 		display: flex;
@@ -85,27 +89,33 @@
 		flex-wrap: wrap;
 		gap: 8px;
 	}
+	nav {
+		color: inherit;
+	}
 	nav a {
-		color: var(--ink-muted);
+		color: inherit;
 		text-decoration: none;
 	}
 	.step {
-		border: 1px solid var(--rule);
-		padding: 6px 10px;
+		border: 1px solid currentcolor;
+		border-radius: 999px;
+		padding: 6px 12px;
 	}
 	.step[aria-disabled='true'] {
-		opacity: 0.3;
+		opacity: 0.6;
 		pointer-events: none;
 	}
 	select {
-		font: 500 13px var(--mono);
-		letter-spacing: 0.05em;
+		font: 600 13px var(--mono);
+		letter-spacing: 0.04em;
 		text-transform: uppercase;
-		color: var(--ink);
-		background: var(--bg);
-		border: 1px solid var(--rule);
-		border-radius: 0;
-		padding: 5px 8px;
+		color: inherit;
+		background: transparent;
+		border: 1px solid currentcolor;
+		padding: 5px 10px;
+	}
+	option {
+		color: #14141a;
 	}
 	.title {
 		display: flex;
@@ -124,41 +134,54 @@
 		align-items: center;
 		gap: 10px;
 		flex-wrap: wrap;
+		color: inherit;
 	}
 	.official {
 		margin: 10px 0 0;
+		color: inherit;
+	}
+	/* Many flags are red: the outline keeps them off the banner. */
+	.meta :global(.flag) {
+		outline-color: var(--on-accent);
 	}
 	h1 {
-		font: 900 clamp(2.75rem, 7vw, 6.5rem) / 0.86 var(--sans);
-		letter-spacing: -0.05em;
+		font: 800 clamp(2.4rem, 5.4vw, 5.2rem) / 0.98 var(--sans);
+		letter-spacing: -0.02em;
 		text-transform: uppercase;
-		margin: 12px 0 0;
+		margin: 14px 0 0;
 	}
 	h1 span {
-		color: var(--accent);
+		color: #16060a;
 	}
 	.sessions {
 		margin-top: 20px;
-		gap: 0;
+		gap: 4px;
 	}
 	.sessions a {
-		border: 1px solid var(--rule);
-		margin-left: -1px;
+		border: 1px solid currentcolor;
+		border-radius: 999px;
 		padding: 8px 14px;
+		color: inherit;
 	}
 	.sessions a[aria-current='page'] {
-		color: var(--bg);
-		background: var(--ink);
-		border-color: var(--ink);
-		position: relative;
+		color: var(--accent);
+		background: var(--on-accent);
+		border-color: var(--on-accent);
 	}
 	@media (hover: hover) {
-		nav a:hover {
-			color: var(--ink);
-			border-color: var(--ink-muted);
+		.step:hover,
+		.sessions a:hover {
+			background: rgb(255 255 255 / 16%);
+		}
+		.sessions a[aria-current='page']:hover {
+			background: var(--on-accent);
 		}
 	}
 	@media (max-width: 700px) {
+		.head {
+			border-radius: 22px;
+			padding: 16px;
+		}
 		.circuit {
 			display: none;
 		}

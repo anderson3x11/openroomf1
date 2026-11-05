@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { RaceEvents } from '#lib/types.ts';
+		import type { RaceEvents } from '#lib/types.ts';
 
 	let { events }: { events: RaceEvents } = $props();
 
@@ -17,7 +17,7 @@
 	{#each events.msgs as m, i (i)}
 		<li class:alert={m.kind === 'penalty' || m.kind === 'red'}>
 			<span class="label lap">L{String(m.lap).padStart(2, '0')}</span>
-			<span class="label kind kind-{m.kind}">[ {KIND_LABELS[m.kind]} ]</span>
+			<span class="label kind kind-{m.kind}">{KIND_LABELS[m.kind]}</span>
 			<span class="msg">{m.msg}</span>
 		</li>
 	{/each}
@@ -45,7 +45,7 @@
 	}
 	.alert .msg,
 	.alert .kind {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.kind-sc,
 	.kind-vsc {

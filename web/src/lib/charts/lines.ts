@@ -35,8 +35,11 @@ export function driverLines(
 			name: r.drv,
 			type: 'line',
 			data: v.slice(0, last + 1).map((x, lap) => [lap, x]),
-			showSymbol: false,
-			lineStyle: { width: 2, ...styles[r.drv] },
+			// A dot where the line ends: the finish, or where the driver stopped.
+			showSymbol: true,
+			symbol: (_: unknown, p: { dataIndex: number }) => (p.dataIndex === last ? 'circle' : 'none'),
+			symbolSize: 7,
+			lineStyle: { width: 3, cap: 'round', join: 'round', ...styles[r.drv] },
 			itemStyle: { color: styles[r.drv].color },
 			endLabel: {
 				show: true,

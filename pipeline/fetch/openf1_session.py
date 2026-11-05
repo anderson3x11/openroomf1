@@ -70,6 +70,22 @@ def neutral_intervals(messages: pd.DataFrame, lap_ends: pd.Series) -> list[tuple
     return sorted(out)
 
 
+def fill_missing_laps(df: pd.DataFrame) -> pd.DataFrame:
+    """OpenF1 can skip a lap of a driver (Mexico 2026: lap 5 of the top 9). The row comes back
+    empty, otherwise the lap before it would run to the following one, twice as long."""
+    filled = []
+    for number, group in df.groupby("driver_number"):
+        by_lap = group.set_index("lap_number")
+        laps = range(int(by_lap.index.min()), int(by_lap.index.max()) + 1)
+        filled.append(
+            by_lap.reindex(laps)
+            .assign(driver_number=number)
+            .rename_axis("lap_number")
+            .reset_index()
+        )
+    return pd.concat(filled, ignore_index=True)
+
+
 def laps_frame(
     laps: list[dict],
     drivers: dict[int, dict],
@@ -83,8 +99,15 @@ def laps_frame(
     lap durations include the time spent in the garage. pits: race and sprint only, in
     qualifying and practice OpenF1 puts its pit records on the out lap (garage exit)."""
     df = pd.DataFrame(laps)
-    df = df[df["driver_number"].isin(drivers)].sort_values(["driver_number", "lap_number"])
-    start = utc(df["date_start"])
+    df = fill_missing_laps(df[df["driver_number"].isin(drivers)])
+    # A skipped lap starts halfway between its neighbours, close enough to rank the cars.
+    since_t0 = (utc(df["date_start"]) - t0).dt.total_seconds()
+    start = t0 + pd.to_timedelta(
+        since_t0.groupby(df["driver_number"]).transform(
+            lambda s: s.interpolate(limit_area="inside")
+        ),
+        unit="s",
+    )
     duration = seconds(df["lap_duration"])
     next_start = start.groupby(df["driver_number"]).shift(-1)
     end = next_start.where(next_start.notna(), start + duration)
@@ -434,6 +457,7 @@ def results_frame(
         if d is None:
             continue
         o = by_number.get(n)
+        rank = o["position"] if o else r.get("position")
         if o:
             cls, grid, status, points = o["positionText"], o["grid"], o["status"], o["points"]
         else:
@@ -447,7 +471,9 @@ def results_frame(
                 "FullName": f"{d.get('first_name', '')} {d.get('last_name', '')}".strip(),
                 "TeamName": d.get("team_name"),
                 "TeamColor": d.get("team_colour"),
-                "Position": r.get("position") if r.get("position") is not None else np.nan,
+                # Order and printed position from one source: OpenF1 and Jolpica can disagree
+                # for days after a penalty.
+                "Position": rank if rank is not None else np.nan,
                 "ClassifiedPosition": cls,
                 "GridPosition": grid,
                 "Status": status,

@@ -25,3 +25,7 @@ Thumbs.db
 .claude/
 .impeccable/
 CLAUDE.md
+
+# Local design tooling, not part of the project
+PRODUCT.md
+DESIGN.md

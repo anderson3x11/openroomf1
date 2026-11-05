@@ -147,13 +147,13 @@
 		wide
 	>
 		{#if failed || !data.circuit}
-			<p class="label">[ NO REPLAY ] Position data is not available for this Grand Prix.</p>
+			<p class="label">Position data is not available for this Grand Prix.</p>
 		{:else if !replay}
-			<p class="label">[ LOADING REPLAY ]</p>
+			<p class="label">Loading replay</p>
 		{:else}
 			<div class="controls">
 				<button class="label primary" onclick={() => (playing = !playing)}>
-					{playing ? '[ PAUSE ]' : '[ PLAY ]'}
+					{playing ? 'PAUSE' : 'PLAY'}
 				</button>
 				<button class="label" onclick={() => seek(-10)} title="Back 10 s (left arrow)">-10S</button>
 				<button class="label" onclick={() => seek(10)} title="Forward 10 s (right arrow)">+10S</button>
@@ -163,7 +163,7 @@
 				{/each}
 				<button class="label gap" aria-pressed={names} onclick={() => (names = !names)}>NAMES</button>
 				{#if selected.size}
-					<button class="label" onclick={() => (selected = new Set())}>[ CLEAR SELECTION ]</button>
+					<button class="label" onclick={() => (selected = new Set())}>CLEAR SELECTION</button>
 				{/if}
 				<span class="label readout">LAP <b>{lap}/{data.positions.laps}</b> / <b>{clock}</b></span>
 			</div>
@@ -344,14 +344,13 @@
 		gap: 4px;
 		padding: 4px 6px 4px 0;
 		border: 0;
-		border-left: 2px solid transparent;
+		border-radius: 8px;
 		color: var(--ink);
 		font: inherit;
 		text-align: left;
 	}
 	.tower button[aria-pressed='true'] {
-		border-left-color: var(--accent);
-		background: color-mix(in srgb, var(--ink) 8%, transparent);
+		background: color-mix(in srgb, var(--ink) 12%, transparent);
 	}
 	.pos {
 		width: 2.6em;

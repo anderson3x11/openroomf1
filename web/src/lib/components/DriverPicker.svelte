@@ -1,5 +1,5 @@
 <script lang="ts">
-	// Per chart driver selection, on top of the global filters. It stands in for the chart
+		// Per chart driver selection, on top of the global filters. It stands in for the chart
 	// legend: team color, logo and code for every line.
 	import type { Driver } from '#lib/types.ts';
 	import TeamMark from './TeamMark.svelte';
@@ -23,8 +23,8 @@
 </script>
 
 <div class="picker" role="group" aria-label="Drivers shown on this chart" data-noshot>
-	<button class="label link" onclick={() => (hidden = new Set())}>[ ALL ]</button>
-	<button class="label link" onclick={() => (hidden = new Set(all))}>[ NONE ]</button>
+	<button class="label link" onclick={() => (hidden = new Set())}>ALL</button>
+	<button class="label link" onclick={() => (hidden = new Set(all))}>NONE</button>
 	{#each results as r (r.drv)}
 		<button
 			class="chip"

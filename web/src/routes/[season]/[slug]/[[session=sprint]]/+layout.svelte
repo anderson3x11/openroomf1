@@ -93,7 +93,7 @@
 	</div>
 
 	{#if filters.drivers.size === 0}
-		<p class="empty label">[ NO DRIVER SELECTED ] Open the filters to pick some.</p>
+		<p class="empty label">No driver selected. Open the filters to pick some.</p>
 	{/if}
 
 	{@render children()}
@@ -116,23 +116,20 @@
 	}
 	.tabs {
 		display: flex;
-		gap: 2px;
-		border-bottom: 1px solid var(--rule);
+		gap: 4px;
 		overflow-x: auto;
 	}
 	.tabs a {
 		font: 700 14px/1 var(--mono);
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
 		color: var(--ink-muted);
 		text-decoration: none;
-		padding: 12px 18px 11px;
-		border-bottom: 2px solid transparent;
+		padding: 10px 18px;
+		border-radius: 999px;
 		white-space: nowrap;
 	}
 	.tabs a[aria-current='page'] {
-		color: var(--ink);
-		border-bottom-color: var(--accent);
+		color: var(--on-accent);
+		background: var(--accent);
 	}
 	.count {
 		font: 500 12px var(--mono);

@@ -8,6 +8,7 @@
 
 	$effect(() => initTheme());
 
+
 	const THEME_LABELS = { auto: 'AUTO', light: 'LIGHT', dark: 'DARK' };
 </script>
 
@@ -23,7 +24,7 @@
 </svelte:head>
 
 <header class="bar">
-	<a href="/" class="label brand">[ OPENROOM / F1 ]</a>
+	<a href="/" class="label brand">OPENROOM / F1</a>
 	<button class="label theme" onclick={cycleTheme} title="Switch theme">
 		THEME: {THEME_LABELS[ui.pref]}
 	</button>

@@ -54,7 +54,7 @@
 
 <style>
 	.top {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: 700;
 	}
 </style>

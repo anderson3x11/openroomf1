@@ -26,7 +26,7 @@
 			{#each lines as { row: r, reached, gap, cut } (r.drv)}
 				<tr class:cut>
 					<td class="num">{r.pos}</td>
-					<td><TeamMark src={logos[r.tid]} color={r.color} team={r.team} /><b>{r.drv}</b> {r.name}</td>
+					<td><TeamMark src={logos[r.tid]} color={r.color} team={r.team} /><b class="drv">{r.drv}</b><span class="drv-name">{r.name}</span></td>
 					<td class="muted">{r.team}</td>
 					{#each r.q as t, i (i)}
 						<td class="num" class:top={t !== null && t === fastest[i]} class:muted={i < reached}
@@ -42,7 +42,7 @@
 
 <style>
 	.top {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: 700;
 	}
 	/* Knockout line: the first driver out of a segment. */

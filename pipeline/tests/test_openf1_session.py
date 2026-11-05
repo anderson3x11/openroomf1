@@ -128,6 +128,21 @@ def test_laps_frame():
     assert df.loc[5, "Deleted"] and not df.loc[2, "Deleted"]
 
 
+def test_lap_skipped_by_openf1_comes_back_empty():
+    laps = [lap(1, 0, 90), lap(2, 90, 90), lap(4, 270, 90), lap(5, 360, 90)]
+    positions = [
+        {"driver_number": 1, "date": at(0), "position": 3},
+        {"driver_number": 1, "date": at(200), "position": 2},
+    ]
+    df = laps_frame(laps, DRIVERS, [], [], positions, messages_frame([]), T0).set_index("LapNumber")
+
+    assert list(df.index) == [1, 2, 3, 4, 5]
+    assert df.loc[2, "Time"] == pd.to_timedelta(180, unit="s")
+    assert df.loc[3, "Time"] == pd.to_timedelta(270, unit="s")
+    assert pd.isna(df.loc[3, "LapTime"])  # never invented
+    assert df.loc[3, "Position"] == 2
+
+
 def test_qualifying_parts():
     laps = pd.DataFrame({"Time": pd.to_timedelta([100, 1200, 1300, 2500], unit="s")})
     messages = messages_frame(
@@ -241,3 +256,32 @@ def test_red_flag_from_session_aborted():
         for a, b, c in neutral_intervals(messages, lap_ends)
     ]
     assert spans == [(100, 200, "4"), (200, 2500, "5"), (3500, 3850, "4")]
+
+
+def test_results_follow_jolpica_order_when_it_has_the_race():
+    """Mexico 2026: OpenF1 and Jolpica disagreed after the race, the order must not mix them."""
+    drivers = {1: DRIVERS[1], 2: {**DRIVERS[1], "name_acronym": "PIA"}}
+    result = [{"driver_number": 1, "position": 1}, {"driver_number": 2, "position": 2}]
+    official = pd.DataFrame(
+        [
+            {
+                "number": 1,
+                "position": 2,
+                "positionText": "2",
+                "grid": 1,
+                "status": "Finished",
+                "points": 18,
+            },
+            {
+                "number": 2,
+                "position": 1,
+                "positionText": "1",
+                "grid": 2,
+                "status": "Finished",
+                "points": 25,
+            },
+        ]
+    )
+    rows = results_frame(drivers, result, official).sort_values("Position")
+    assert rows["Abbreviation"].tolist() == ["PIA", "NOR"]
+    assert rows["ClassifiedPosition"].tolist() == ["1", "2"]

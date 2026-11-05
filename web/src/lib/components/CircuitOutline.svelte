@@ -18,7 +18,7 @@
 	}
 	polygon {
 		fill: none;
-		stroke: var(--ink);
+		stroke: currentcolor;
 		stroke-width: 10;
 		stroke-linejoin: round;
 		opacity: 0.9;

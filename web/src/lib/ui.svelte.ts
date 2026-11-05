@@ -6,6 +6,7 @@ export const ui = $state({ pref: 'auto' as ThemePref, theme: 'dark' as 'light' |
 
 const KEY = 'openroom-theme';
 
+
 function apply() {
 	const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 	ui.theme = ui.pref === 'auto' ? (dark ? 'dark' : 'light') : ui.pref;

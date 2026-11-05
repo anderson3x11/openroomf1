@@ -25,7 +25,7 @@
 		wide
 	>
 		{#if data.radios.length === 0}
-			<p class="label">[ NO RADIO ] None published for this Grand Prix.</p>
+			<p class="label">No radio published for this Grand Prix.</p>
 		{:else}
 			<div class="scroll">
 				<table class="data">

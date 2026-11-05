@@ -98,7 +98,7 @@
 		color: var(--ink-muted);
 	}
 	.score .lead {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.side {
 		width: 40%;
