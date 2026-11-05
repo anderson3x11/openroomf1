@@ -38,7 +38,7 @@
 					<td class="num">{s.before ?? ''}</td>
 					<td class="num">{s.after ?? ''}</td>
 					<td class="num {trend(delta(s))}">{signed(delta(s))}</td>
-					<td class="label">{s.under ? `[ ${s.under.toUpperCase()} ]` : ''}</td>
+					<td class="label">{s.under ? s.under.toUpperCase() : ''}</td>
 				</tr>
 			{/each}
 		</tbody>

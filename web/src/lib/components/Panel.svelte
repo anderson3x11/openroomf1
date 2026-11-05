@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { tag, ui } from '#lib/ui.svelte.ts';
-	import { tick, type Snippet } from 'svelte';
+		import { tick, type Snippet } from 'svelte';
 	import { capture } from '#lib/capture.svelte.ts';
 	import { getRace } from '#lib/race.ts';
 	import { copy, download, fileSlug, panelPng } from '#lib/shot.ts';
@@ -41,15 +40,15 @@
 	{#if capturing}<div class="label caption">{race.shot.caption}</div>{/if}
 	<header>
 		<div>
-			<h2>{ui.da ? title : `// ${title}`}</h2>
+			<h2>{title}</h2>
 			{#if desc && !capturing}<p>{desc}</p>{/if}
 		</div>
 		<div class="actions" data-noshot>
 			{#if actions}{@render actions()}{/if}
 			<span class="shot label">
 				{#if status}{status}{:else}
-					<button onclick={save} title="Save this panel as a PNG image">{tag('PNG')}</button>
-					<button onclick={clip} title="Copy this panel as an image">{tag('COPY')}</button>
+					<button onclick={save} title="Save this panel as a PNG image">PNG</button>
+					<button onclick={clip} title="Copy this panel as an image">COPY</button>
 				{/if}
 			</span>
 		</div>
@@ -60,7 +59,8 @@
 
 <style>
 	.panel {
-		background: var(--bg);
+		background: var(--panel);
+		border-radius: var(--radius);
 		padding: 20px;
 		min-width: 0;
 	}
@@ -111,9 +111,7 @@
 		}
 	}
 	h2 {
-		font: 700 14px/1.2 var(--mono);
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
+		font: 700 15px/1.2 var(--sans);
 		margin: 0;
 	}
 	p {

@@ -54,9 +54,9 @@
 </script>
 
 {#if failed}
-	<p class="label empty">[ NO TELEMETRY ] No car data for this session.</p>
+	<p class="label empty">No car data for this session.</p>
 {:else if !tel}
-	<p class="label empty">[ LOADING TELEMETRY ]</p>
+	<p class="label empty">Loading telemetry</p>
 {:else}
 	<div class="panels">
 		<Panel
@@ -92,7 +92,7 @@
 									<td class="num">{formatLap(lap.time)}</td>
 									<td class="num muted">{i ? `+${(lap.time - tel.laps[selected[0]].time).toFixed(3)}` : 'REF'}</td>
 									<td class="muted">{lap.cmp}</td>
-									<td data-noshot>{#if i}<button class="label link" onclick={() => setRef(d)}>[ SET AS REF ]</button>{/if}</td>
+									<td data-noshot>{#if i}<button class="label link" onclick={() => setRef(d)}>SET AS REF</button>{/if}</td>
 								</tr>
 							{/each}
 						</tbody>

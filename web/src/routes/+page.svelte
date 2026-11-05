@@ -11,12 +11,12 @@
 <main>
 	{#if data.seasons.length > 1}
 		<nav class="label seasons" aria-label="Seasons">
-			{#each data.seasons as { season } (season)}<a href="#season-{season}">[ {season} ]</a>{/each}
+			{#each data.seasons as { season } (season)}<a href="#season-{season}">{season}</a>{/each}
 		</nav>
 	{/if}
 	{#each data.seasons as { season, gps } (season)}
 		<header id="season-{season}">
-			<p class="label">[ SEASON ] {gps.length} GRANDS PRIX ANALYSED</p>
+			<p class="label">{gps.length} GRANDS PRIX ANALYSED</p>
 			<h1>{season}</h1>
 		</header>
 		<ol class="gps">
@@ -24,7 +24,7 @@
 				<li>
 					<a href="/{season}/{gp.slug}">
 						<span class="top">
-							<span class="label">[ R{String(gp.round).padStart(2, '0')} ]</span>
+							<span class="label">R{String(gp.round).padStart(2, '0')}</span>
 							<Flag src={gp.flag ? data.flags[gp.flag] : undefined} country={gp.host ?? gp.country} size={30} />
 						</span>
 						<span class="name">{shortName(gp.name)}</span>
@@ -37,7 +37,7 @@
 			{/each}
 		</ol>
 	{:else}
-		<p class="label">[ NO GP YET ] Run the pipeline.</p>
+		<p class="label">No Grand Prix yet. Run the pipeline.</p>
 	{/each}
 </main>
 
@@ -57,8 +57,12 @@
 		margin-top: 8px;
 	}
 	.seasons a {
+		display: inline-block;
+		height: auto;
 		color: var(--ink-muted);
 		text-decoration: none;
+		padding: 6px 14px;
+		border-radius: 999px;
 	}
 	@media (hover: hover) {
 		.seasons a:hover {
@@ -66,8 +70,9 @@
 		}
 	}
 	h1 {
-		font: 900 clamp(3rem, 12vw, 9rem) / 0.85 var(--sans);
-		letter-spacing: -0.04em;
+		font: 800 clamp(3rem, 11vw, 8rem) / 0.95 var(--sans);
+		letter-spacing: -0.03em;
+		color: var(--accent-text);
 		margin: 8px 0 0;
 	}
 	.gps {
@@ -76,16 +81,15 @@
 		margin: 0;
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-		gap: 1px;
-		background: var(--rule);
-		border: 1px solid var(--rule);
+		gap: var(--gap);
 	}
 	a {
 		display: grid;
 		grid-template-rows: auto auto auto auto;
 		gap: 8px;
 		padding: 18px 20px;
-		background: var(--bg);
+		background: var(--panel);
+		border-radius: var(--radius);
 		text-decoration: none;
 		height: 100%;
 	}
@@ -95,8 +99,8 @@
 		align-items: center;
 	}
 	.name {
-		font: 900 34px/1 var(--sans);
-		letter-spacing: -0.03em;
+		font: 800 24px/1.05 var(--sans);
+		letter-spacing: -0.01em;
 		text-transform: uppercase;
 		margin-top: 6px;
 	}
@@ -105,10 +109,11 @@
 	}
 	@media (hover: hover) {
 		a:hover {
-			background: var(--panel);
+			color: var(--on-accent);
+			background: var(--accent);
 		}
-		a:hover .name {
-			color: var(--accent);
+		a:hover :is(.label, .venue) {
+			color: inherit;
 		}
 	}
 </style>

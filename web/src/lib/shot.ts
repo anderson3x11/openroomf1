@@ -5,7 +5,7 @@ import { toBlob } from 'html-to-image';
 export async function panelPng(node: HTMLElement): Promise<Blob> {
 	const blob = await toBlob(node, {
 		pixelRatio: 2,
-		backgroundColor: getComputedStyle(document.body).backgroundColor,
+		backgroundColor: getComputedStyle(node).backgroundColor,
 		filter: (n) => !(n instanceof HTMLElement && n.dataset.noshot !== undefined)
 	});
 	if (!blob) throw new Error('empty screenshot');

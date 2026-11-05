@@ -42,7 +42,7 @@
 
 <style>
 	.top {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: 700;
 	}
 	/* Knockout line: the first driver out of a segment. */

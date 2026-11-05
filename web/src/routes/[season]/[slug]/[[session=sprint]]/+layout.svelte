@@ -3,7 +3,7 @@
 	import FilterBar from '#lib/components/FilterBar.svelte';
 	import GpHeader from '#lib/components/GpHeader.svelte';
 	import { filtersFromParams, filtersSummary, filtersToParams, type Filters } from '#lib/filters.ts';
-	import { inkOn, SESSION_LABELS } from '#lib/format.ts';
+	import { SESSION_LABELS } from '#lib/format.ts';
 	import { setRace } from '#lib/race.ts';
 	import { ui } from '#lib/ui.svelte.ts';
 	import { readParams, writeParams } from '#lib/url.ts';
@@ -69,7 +69,7 @@
 	><title>{data.meta.name} {data.meta.season}{data.segment ? ' sprint' : ''} | OpenRoom F1</title></svelte:head
 >
 
-<main style:--win={data.results[0]?.color} style:--win-ink={inkOn(data.results[0]?.color ?? null)}>
+<main>
 	<GpHeader meta={data.meta} season={data.season} laps={data.positions.laps} circuit={data.circuit}
 		flag={data.meta.flag ? data.flags[data.meta.flag] : undefined}
 	/>
@@ -93,7 +93,7 @@
 	</div>
 
 	{#if filters.drivers.size === 0}
-		<p class="empty label">[ NO DRIVER SELECTED ] Open the filters to pick some.</p>
+		<p class="empty label">No driver selected. Open the filters to pick some.</p>
 	{/if}
 
 	{@render children()}
@@ -116,23 +116,20 @@
 	}
 	.tabs {
 		display: flex;
-		gap: 2px;
-		border-bottom: 1px solid var(--rule);
+		gap: 4px;
 		overflow-x: auto;
 	}
 	.tabs a {
 		font: 700 14px/1 var(--mono);
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
 		color: var(--ink-muted);
 		text-decoration: none;
-		padding: 12px 18px 11px;
-		border-bottom: 2px solid transparent;
+		padding: 10px 18px;
+		border-radius: 999px;
 		white-space: nowrap;
 	}
 	.tabs a[aria-current='page'] {
-		color: var(--ink);
-		border-bottom-color: var(--accent);
+		color: var(--on-accent);
+		background: var(--accent);
 	}
 	.count {
 		font: 500 12px var(--mono);

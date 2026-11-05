@@ -3,19 +3,18 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
-		<meta name="theme-color" content="#f4f4f0" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#111116" media="(prefers-color-scheme: dark)" />
+		<meta name="theme-color" content="#f1f0ec" media="(prefers-color-scheme: light)" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
 			rel="stylesheet"
 			crossorigin="anonymous"
-			href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700;125,800;125,900&family=Figtree:wght@400;500;600;700&family=Inter:wght@700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Saira:wdth,wght@100,400;100,500;100,600;100,700;125,700;125,800&family=Titillium+Web:wght@400;600;700&family=Unbounded:wght@600;700;800&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Unbounded:wght@600;700;800&display=swap"
 		/>
 		<script>
 			// Apply the saved theme before the first paint (see src/lib/ui.svelte.ts).
 			try {
-				document.documentElement.dataset.da = new URLSearchParams(location.search).get('da') ?? '';
 				const pref = localStorage.getItem('openroom-theme') ?? 'auto';
 				const dark = matchMedia('(prefers-color-scheme: dark)').matches;
 				document.documentElement.dataset.theme = pref === 'auto' ? (dark ? 'dark' : 'light') : pref;

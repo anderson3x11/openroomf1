@@ -14,7 +14,7 @@
 	</span>
 	<span class="caption">
 		<b>{title}</b>
-		<span class="label">[ WATCH ON YOUTUBE ]</span>
+		<span class="label">WATCH ON YOUTUBE</span>
 	</span>
 </a>
 

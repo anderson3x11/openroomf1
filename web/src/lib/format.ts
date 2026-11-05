@@ -52,16 +52,6 @@ export const hostCountry = (gp: { host?: string | null; country: string }) => {
 	return COUNTRY_NAMES[host] ?? host;
 };
 
-/** Black or white, whichever reads better on a #RRGGBB color (WCAG relative luminance). */
-export function inkOn(hex: string | null): string {
-	if (!hex) return '#FFFFFF';
-	const channel = (i: number) => {
-		const c = parseInt(hex.slice(i, i + 2), 16) / 255;
-		return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-	};
-	const l = 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
-	return (l + 0.05) / 0.05 >= 1.05 / (l + 0.05) ? '#0B0B0F' : '#FFFFFF';
-}
 
 /** Sessions of a GP as shown on the site, and their URL segment ('' for the race). */
 export const SESSION_LABELS: Record<Session, string> = {

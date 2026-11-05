@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { tag } from '#lib/ui.svelte.ts';
-	import { formatLap } from '#lib/stats.ts';
+		import { formatLap } from '#lib/stats.ts';
 	import type { ResultRow, Summary } from '#lib/types.ts';
 	import TeamMark from './TeamMark.svelte';
 
@@ -29,7 +28,7 @@
 
 {#snippet tile(label: string, drv: string | undefined, value: string, sub: string)}
 	<div>
-		<dt class="label">{tag(label)}</dt>
+		<dt class="label">{label}</dt>
 		{#if drv}
 			<dd class="big">{@render who(drv)}<span class="value">{value}</span></dd>
 			<dd class="sub">{sub}</dd>
@@ -60,14 +59,21 @@
 	.tiles {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-		gap: 1px;
-		background: var(--rule);
-		border: 1px solid var(--rule);
-		margin: 0 0 16px;
+		gap: var(--gap);
+		margin: 0 0 var(--gap);
 	}
 	.tiles > div {
-		background: var(--bg);
+		background: var(--panel);
+		border-radius: var(--radius);
 		padding: 18px 20px;
+	}
+	/* The race's one fact, in the color of the page. */
+	.tiles > div:nth-child(2) {
+		color: var(--on-accent);
+		background: var(--accent);
+	}
+	.tiles > div:nth-child(2) :is(dt, .sub) {
+		color: inherit;
 	}
 	dt {
 		color: var(--ink-muted);
@@ -76,7 +82,7 @@
 		margin: 0;
 	}
 	.big {
-		font: 700 34px/1.1 var(--mono);
+		font: 700 27px/1.1 var(--sans);
 		margin: 12px 0 6px;
 		display: flex;
 		align-items: center;

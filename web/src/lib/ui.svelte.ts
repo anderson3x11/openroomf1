@@ -2,24 +2,10 @@
 // Charts read ui.theme while building their options, so they rebuild on theme change.
 export type ThemePref = 'auto' | 'light' | 'dark';
 
-export type Da = '' | 'livery' | 'hub' | 'tower';
-
-export const ui = $state({ pref: 'auto' as ThemePref, theme: 'dark' as 'light' | 'dark', da: '' as Da });
+export const ui = $state({ pref: 'auto' as ThemePref, theme: 'dark' as 'light' | 'dark' });
 
 const KEY = 'openroom-theme';
 
-/** Art direction under test (branch only): ?da=livery|hub|tower, '' is the current site. */
-export function setDa(da: Da) {
-	ui.da = da;
-	document.documentElement.dataset.da = da;
-	const url = new URL(window.location.href);
-	if (da) url.searchParams.set('da', da);
-	else url.searchParams.delete('da');
-	history.replaceState(history.state, '', url);
-}
-
-/** A status label: bracketed in the terminal look of the current site, plain otherwise. */
-export const tag = (text: string | number) => (ui.da ? String(text) : `[ ${text} ]`);
 
 function apply() {
 	const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -33,8 +19,6 @@ export function initTheme() {
 	} catch {
 		// Storage can be blocked: fall back to the system preference.
 	}
-	const da = new URLSearchParams(window.location.search).get('da');
-	if (da === 'livery' || da === 'hub' || da === 'tower') setDa(da);
 	apply();
 	const mq = window.matchMedia('(prefers-color-scheme: dark)');
 	mq.addEventListener('change', apply);

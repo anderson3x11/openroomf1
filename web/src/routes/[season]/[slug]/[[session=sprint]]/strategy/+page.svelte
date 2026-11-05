@@ -1,13 +1,12 @@
 <script lang="ts">
 	import Chart from '#lib/Chart.svelte';
 	import { degradationOption } from '#lib/charts/degradation.ts';
-	import { strategyOption } from '#lib/charts/strategy.ts';
 	import { weatherOption } from '#lib/charts/weather.ts';
 	import Panel from '#lib/components/Panel.svelte';
 	import PitStopsTable from '#lib/components/PitStopsTable.svelte';
+	import StrategyChart from '#lib/components/StrategyChart.svelte';
 	import { filterPitStops, filterResults, filterStints, withLapRange } from '#lib/filters.ts';
 	import { getRace } from '#lib/race.ts';
-	import { tyreColor } from '#lib/tyres.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -22,20 +21,16 @@
 <div class="panels">
 	<Panel
 		title="Tyre strategies"
-		desc="One stint per segment, in finishing order. Number: last lap of the stint (pit stop, then flag). Hover for the tyre age at the start of the stint."
+		desc="One line per driver in finishing order, one color per compound. Discs: lap of each pit stop, on the right: last lap. Hover a stint for its tyre age."
+		wide
 	>
-		<p class="legend">
-			{#each compounds as c (c)}
-				<span class="label"><span class="swatch" style:background={tyreColor(c)}></span>{c}</span>
-			{/each}
-			<span class="label"><span class="swatch used"></span>USED TYRES</span>
-		</p>
-		<Chart
-			option={withLapRange(
-				strategyOption(stints, results, data.positions.laps, race.logos, race.filters.compounds),
-				race.filters.laps
-			)}
-			height={results.length * 26 + 48}
+		<StrategyChart
+			drivers={results}
+			{stints}
+			laps={race.filters.laps}
+			compounds={race.filters.compounds}
+			legend={compounds}
+			stops={pitstops.length}
 		/>
 	</Panel>
 
@@ -70,13 +65,3 @@
 	{/if}
 </div>
 
-<style>
-	.used {
-		background: repeating-linear-gradient(-45deg, var(--ink-muted) 0 2px, transparent 2px 5px);
-	}
-	.legend {
-		display: flex;
-		gap: 16px;
-		margin: 0 0 8px;
-	}
-</style>

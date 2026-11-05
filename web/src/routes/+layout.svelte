@@ -1,9 +1,7 @@
 <script lang="ts">
 	import favicon from '#lib/assets/favicon.svg';
-	import DaSwitch from '#lib/components/DaSwitch.svelte';
-	import { cycleTheme, initTheme, tag, ui } from '#lib/ui.svelte.ts';
+	import { cycleTheme, initTheme, ui } from '#lib/ui.svelte.ts';
 	import '../app.css';
-	import '../lib/da.css';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
@@ -25,15 +23,13 @@
 </svelte:head>
 
 <header class="bar">
-	<a href="/" class="label brand">{tag('OPENROOM / F1')}</a>
+	<a href="/" class="label brand">OPENROOM / F1</a>
 	<button class="label theme" onclick={cycleTheme} title="Switch theme">
 		THEME: {THEME_LABELS[ui.pref]}
 	</button>
 </header>
 
 {@render children()}
-
-<DaSwitch />
 
 <footer class="label">
 	UNOFFICIAL SITE, NOT AFFILIATED WITH FORMULA 1. TEAM LOGOS AND NAMES BELONG TO THEIR OWNERS.

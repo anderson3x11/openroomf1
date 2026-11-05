@@ -105,7 +105,6 @@
 		color: var(--ink);
 		background: var(--bg);
 		border: 1px solid var(--rule);
-		border-radius: 0;
 		padding: 5px 8px;
 		margin-left: 8px;
 		text-transform: uppercase;

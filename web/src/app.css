@@ -1,52 +1,66 @@
 :root {
-	--bg: #0a0a0a;
-	--panel: #111111;
-	--rule: #2a2a2a;
-	--rule-soft: #1a1a1a;
-	--ink: #eaeaea;
-	--ink-muted: #8a8a8a;
-	--accent: #e61919;
+	--bg: #111116;
+	--panel: #191920;
+	--rule: #34343e;
+	--rule-soft: #26262e;
+	--ink: #f4f4f6;
+	--ink-muted: #a2a2ae;
+	--accent: #d90b14;
+	--on-accent: #ffffff;
+	--accent-text: #ff5b55; /* the red as text on a panel: lighter on dark, darker on light */
 	--gain: #4af626;
 	--sc: #ffd12e;
-	--focus: #eaeaea;
-	--sans: 'Inter', system-ui, sans-serif;
-	--mono: 'JetBrains Mono', ui-monospace, monospace;
+	--focus: #f4f4f6;
+	--sans: 'Unbounded', sans-serif;
+	--mono: 'Figtree', system-ui, sans-serif;
+	--gap: 10px;
+	--radius: 22px;
 	color-scheme: dark;
 }
 
 /* Light theme: chosen in the header, or the system preference before the script runs. */
 :root[data-theme='light'] {
-	--bg: #f4f4f0;
-	--panel: #eae8e3;
-	--rule: #cfcdc6;
-	--rule-soft: #e2e0da;
-	--ink: #111111;
-	--ink-muted: #5e5e5a;
-	--accent: #e61919;
+	--bg: #f1f0ec;
+	--panel: #ffffff;
+	--rule: #d6d4ce;
+	--rule-soft: #e7e5e0;
+	--ink: #14141a;
+	--ink-muted: #5c5c66;
+	--accent-text: #c70812;
 	--gain: #1d7a1d;
 	--sc: #9a7400;
-	--focus: #111111;
+	--focus: #14141a;
 	color-scheme: light;
 }
 @media (prefers-color-scheme: light) {
 	:root:not([data-theme]) {
-		--bg: #f4f4f0;
-		--panel: #eae8e3;
-		--rule: #cfcdc6;
-		--rule-soft: #e2e0da;
-		--ink: #111111;
-		--ink-muted: #5e5e5a;
-		--accent: #e61919;
+		--bg: #f1f0ec;
+		--panel: #ffffff;
+		--rule: #d6d4ce;
+		--rule-soft: #e7e5e0;
+		--ink: #14141a;
+		--ink-muted: #5c5c66;
+		--accent-text: #c70812;
 		--gain: #1d7a1d;
 		--sc: #9a7400;
-		--focus: #111111;
+		--focus: #14141a;
 		color-scheme: light;
 	}
 }
 
 * {
 	box-sizing: border-box;
-	border-radius: 0;
+}
+
+::selection {
+	color: var(--on-accent);
+	background: var(--accent);
+}
+
+button,
+select,
+input {
+	border-radius: 999px;
 }
 
 body {
@@ -69,7 +83,7 @@ a {
 
 .label {
 	font: 500 12px/1.2 var(--mono);
-	letter-spacing: 0.08em;
+	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	color: var(--ink-muted);
 }
@@ -98,7 +112,7 @@ table.data .num {
 	color: var(--ink-muted);
 }
 .loss {
-	color: var(--accent);
+	color: var(--accent-text);
 }
 .win {
 	color: var(--gain);
@@ -111,13 +125,11 @@ table.data .num {
 	vertical-align: -1px;
 }
 
-/* Panel grid of the GP tabs: 1px lines drawn by the gap over the rule color. */
+/* Panel grid of the GP tabs. */
 .panels {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-	gap: 1px;
-	background: var(--rule);
-	border: 1px solid var(--rule);
+	gap: var(--gap);
 }
 @media (max-width: 900px) {
 	.panels {
