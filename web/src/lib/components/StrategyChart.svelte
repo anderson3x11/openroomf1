@@ -73,7 +73,7 @@
 		display: grid;
 		grid-template-columns: 11.5rem minmax(0, 1fr) 2.75rem;
 		align-items: center;
-		height: 32px;
+		height: 40px;
 	}
 	.name,
 	.end,

@@ -72,35 +72,67 @@
 		flag={data.meta.flag ? data.flags[data.meta.flag] : undefined}
 	/>
 
-	<div class="sticky">
+	<div class="room">
 		<nav class="tabs" aria-label="{SESSION_LABELS[data.session]} tabs">
 			{#each tabs as t (t.href)}
 				<a href={t.href} aria-current={page.url.pathname === t.href ? 'page' : undefined}>{t.label}</a>
 			{/each}
 		</nav>
-		<FilterBar bind:filters results={data.results} logos={data.logos[ui.theme]} {compounds} />
+		<aside>
+			<FilterBar bind:filters results={data.results} logos={data.logos[ui.theme]} {compounds} />
+		</aside>
+		<div class="content">
+			{#if filters.drivers.size === 0}
+				<p class="empty label">No driver selected. Pick some in the filters.</p>
+			{/if}
+
+			{@render children()}
+		</div>
 	</div>
-
-	{#if filters.drivers.size === 0}
-		<p class="empty label">No driver selected. Open the filters to pick some.</p>
-	{/if}
-
-	{@render children()}
 </main>
 <style>
 	main {
 		padding: 0 16px 24px;
-		max-width: 1680px;
+		max-width: 1840px;
 		margin: 0 auto;
 	}
-	.sticky {
-		position: sticky;
-		top: 0;
-		z-index: 10;
-		background: var(--bg);
-		padding: 8px 0 12px;
+	.room {
 		display: grid;
-		gap: 8px;
+		grid-template-columns: minmax(0, 1fr);
+		column-gap: var(--gap);
+		margin-top: var(--gap);
+	}
+	aside {
+		margin-bottom: var(--gap);
+	}
+	@media (min-width: 701px) {
+		.tabs {
+			position: sticky;
+			top: 0;
+			z-index: 10;
+			background: var(--bg);
+			padding: 8px 0 12px;
+		}
+	}
+	/* Filters follow the page, on the side from 1100px. */
+	@media (min-width: 1100px) {
+		.room {
+			grid-template-columns: 270px minmax(0, 1fr);
+		}
+		.tabs {
+			grid-column: 2;
+		}
+		aside {
+			grid-column: 1;
+			grid-row: 1 / span 2;
+			position: sticky;
+			top: 12px;
+			align-self: start;
+			margin: 0;
+		}
+		.content {
+			grid-column: 2;
+		}
 	}
 	.tabs {
 		display: flex;
@@ -128,10 +160,5 @@
 		padding: 16px;
 		border: 1px dashed var(--rule);
 		text-transform: none;
-	}
-	@media (max-width: 700px) {
-		.sticky {
-			position: static;
-		}
 	}
 </style>

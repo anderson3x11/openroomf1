@@ -44,7 +44,7 @@
 <style>
 	main {
 		padding: 16px;
-		max-width: 1680px;
+		max-width: 1840px;
 		margin: 0 auto;
 	}
 	header {

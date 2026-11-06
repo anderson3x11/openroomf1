@@ -2,7 +2,6 @@
 	import Chart from '#lib/Chart.svelte';
 	import { positionsOption } from '#lib/charts/positions.ts';
 	import { startOption } from '#lib/charts/start.ts';
-	import DriverPicker from '#lib/components/DriverPicker.svelte';
 	import EventsList from '#lib/components/EventsList.svelte';
 	import Highlights from '#lib/components/Highlights.svelte';
 	import Panel from '#lib/components/Panel.svelte';
@@ -18,8 +17,6 @@
 
 	const results = $derived(filterResults(data.results, race.filters));
 	const events = $derived(filterEvents(data.events, race.filters));
-	// Drivers hidden on the positions chart only, on top of the global filters.
-	let hiddenPositions = $state(new Set<string>());
 </script>
 
 <StatTiles results={data.results} summary={data.summary} logos={race.logos} />
@@ -38,19 +35,12 @@
 		desc="Solid line: lead finisher of the team, dashed: second driver. Yellow band: safety car or VSC."
 		wide
 	>
-		<DriverPicker {results} logos={race.logos} bind:hidden={hiddenPositions} />
 		<Chart
 			option={withLapRange(
-				positionsOption(
-					data.positions,
-					results.filter((r) => !hiddenPositions.has(r.drv)),
-					race.logos,
-					data.events,
-					data.results
-				),
+				positionsOption(data.positions, results, race.logos, data.events, data.results),
 				race.filters.laps
 			)}
-			height={560}
+			height={680}
 		/>
 	</Panel>
 

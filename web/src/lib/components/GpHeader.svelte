@@ -32,13 +32,18 @@
 	const short = (name: string) => name.replace(/ Grand Prix$/, '');
 </script>
 
+{#snippet chevron(d: string)}
+	<svg viewBox="0 0 10 10" aria-hidden="true"><path {d} /></svg>
+{/snippet}
+
 <div class="head">
 	<nav class="label" aria-label="Grands Prix of the season">
-		<a href="/">{meta.season}</a>
-		<a class="step" href={prev ? href(prev) : undefined} aria-disabled={!prev} title={prev?.name}
-			>&lt; {prev ? short(prev.name) : ''}</a
-		>
+		<a class="season" href="/">{meta.season}</a>
+		{#if prev}
+			<a class="pill" href={href(prev)} title={prev.name}>{@render chevron('M6.5 1.5 3 5l3.5 3.5')}{short(prev.name)}</a>
+		{/if}
 		<select
+			class="pill"
 			aria-label="Choose a Grand Prix"
 			value={meta.slug}
 			onchange={(e) => goto(href(season.find((g) => g.slug === e.currentTarget.value) as GpSummary))}
@@ -47,9 +52,9 @@
 				<option value={gp.slug}>{round(gp.round)} / {short(gp.name)}</option>
 			{/each}
 		</select>
-		<a class="step" href={next ? href(next) : undefined} aria-disabled={!next} title={next?.name}
-			>{next ? short(next.name) : ''} &gt;</a
-		>
+		{#if next}
+			<a class="pill" href={href(next)} title={next.name}>{short(next.name)}{@render chevron('M3.5 1.5 7 5 3.5 8.5')}</a>
+		{/if}
 	</nav>
 	<div class="title">
 		<div>
@@ -67,7 +72,7 @@
 	{#if meta.sessions.length > 1}
 		<nav class="sessions" aria-label="Sessions of the Grand Prix">
 			{#each meta.sessions as s (s)}
-				<a class="label" href="{base}{sessionPath(s)}" aria-current={s === session ? 'page' : undefined}
+				<a class="pill" href="{base}{sessionPath(s)}" aria-current={s === session ? 'page' : undefined}
 					>{SESSION_LABELS[s]}</a
 				>
 			{/each}
@@ -77,6 +82,7 @@
 
 <style>
 	.head {
+		position: relative;
 		color: var(--on-accent);
 		background: var(--accent);
 		border-radius: 28px;
@@ -96,26 +102,46 @@
 		color: inherit;
 		text-decoration: none;
 	}
-	.step {
-		border: 1px solid currentcolor;
-		border-radius: 999px;
-		padding: 6px 12px;
+	.season {
+		font-weight: 700;
+		margin-right: 4px;
 	}
-	.step[aria-disabled='true'] {
-		opacity: 0.6;
-		pointer-events: none;
-	}
-	select {
-		font: 600 13px var(--mono);
+	/* Every control of the banner, one shape: dark on the red, white when current. */
+	.pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		height: 34px;
+		padding: 0 14px;
+		font: 600 12px/1 var(--mono);
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 		color: inherit;
-		background: transparent;
-		border: 1px solid currentcolor;
-		padding: 5px 10px;
+		background-color: rgb(0 0 0 / 20%);
+		border: 0;
+		border-radius: 999px;
+	}
+	.pill svg {
+		width: 10px;
+		height: 10px;
+		fill: none;
+		stroke: currentcolor;
+		stroke-width: 1.6;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+	select.pill {
+		appearance: none;
+		cursor: pointer;
+		padding-right: 32px;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 3.5 5 7l3.5-3.5' fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 12px center;
+		background-size: 10px;
 	}
 	option {
-		color: #14141a;
+		color: var(--ink);
+		background: var(--panel);
 	}
 	.title {
 		display: flex;
@@ -124,8 +150,8 @@
 		gap: 24px;
 	}
 	.circuit {
-		width: clamp(140px, 22vw, 340px);
-		height: clamp(110px, 13vw, 200px);
+		width: clamp(140px, 24vw, 340px);
+		height: clamp(110px, 14vw, 200px);
 		flex-shrink: 0;
 	}
 	.meta {
@@ -157,24 +183,27 @@
 		margin-top: 20px;
 		gap: 4px;
 	}
-	.sessions a {
-		border: 1px solid currentcolor;
-		border-radius: 999px;
-		padding: 8px 14px;
-		color: inherit;
-	}
 	.sessions a[aria-current='page'] {
 		color: var(--accent);
 		background: var(--on-accent);
-		border-color: var(--on-accent);
 	}
 	@media (hover: hover) {
-		.step:hover,
-		.sessions a:hover {
-			background: rgb(255 255 255 / 16%);
+		.pill:hover {
+			background-color: rgb(0 0 0 / 34%);
 		}
 		.sessions a[aria-current='page']:hover {
 			background: var(--on-accent);
+		}
+	}
+	/* From 1100px the track takes the whole height of the banner. */
+	@media (min-width: 1100px) {
+		.circuit {
+			position: absolute;
+			top: 24px;
+			right: 32px;
+			bottom: 24px;
+			width: min(38%, 620px);
+			height: auto;
 		}
 	}
 	@media (max-width: 700px) {

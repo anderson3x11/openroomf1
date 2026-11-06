@@ -32,7 +32,7 @@
 			class="cell"
 			class:in={lap >= laps[0] && lap <= laps[1]}
 			class:sc={isNeutral(lap)}
-			title="Lap {lap}{isNeutral(lap) ? ' (SC / VSC)' : ''}"
+			title="Lap {lap}{isNeutral(lap) ? ' (SC, VSC or red flag)' : ''}"
 			aria-label="Lap {lap}"
 			onpointerdown={(e) => down(e, lap)}
 			onpointerenter={() => anchor !== null && pick(anchor, lap)}
@@ -41,7 +41,7 @@
 	{/each}
 </div>
 <div class="ticks label" aria-hidden="true">
-	{#each cells.filter((l) => l === 1 || l % 10 === 0 || l === total) as lap (lap)}
+	{#each cells.filter((l) => l === 1 || l === total || (l % 20 === 0 && total - l >= 8)) as lap (lap)}
 		<span style:left="{((lap - 0.5) / total) * 100}%">{lap}</span>
 	{/each}
 </div>
@@ -49,8 +49,9 @@
 <style>
 	.strip {
 		display: flex;
-		gap: 1px;
-		height: 26px;
+		height: 32px;
+		overflow: hidden;
+		border-radius: 8px;
 		touch-action: none; /* dragging selects laps instead of scrolling the page */
 		user-select: none;
 	}
@@ -60,22 +61,24 @@
 		padding: 0;
 		border: 0;
 		background: var(--rule);
+		border-radius: 0;
 		cursor: pointer;
-		border-bottom: 3px solid transparent;
-	}
-	.cell.sc {
-		border-bottom-color: var(--sc);
+		transition: none;
 	}
 	.cell.in {
 		background: var(--accent);
 	}
+	/* Neutralised laps, the same yellow in both themes. */
+	.cell.sc {
+		background: color-mix(in srgb, #ffd12e 45%, var(--rule));
+	}
+	.cell.sc.in {
+		background: #ffd12e;
+	}
 	@media (hover: hover) {
-		.cell:hover {
-			background: var(--ink-muted);
-		}
+		.cell:hover,
 		.cell.in:hover {
-			background: var(--accent);
-			opacity: 0.8;
+			background: var(--ink);
 		}
 	}
 	.ticks {

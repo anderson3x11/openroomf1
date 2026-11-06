@@ -61,7 +61,7 @@
 	.panel {
 		background: var(--panel);
 		border-radius: var(--radius);
-		padding: 20px;
+		padding: 28px;
 		min-width: 0;
 	}
 	.wide {
@@ -76,10 +76,10 @@
 		justify-content: space-between;
 		align-items: flex-start;
 		gap: 16px;
-		flex-wrap: wrap;
-		margin-bottom: 16px;
+		margin-bottom: 22px;
 	}
 	.actions {
+		flex-shrink: 0;
 		display: flex;
 		align-items: center;
 		gap: 12px;
@@ -110,8 +110,16 @@
 			color: var(--ink);
 		}
 	}
+	@media (max-width: 700px) {
+		.panel {
+			padding: 16px;
+		}
+		header {
+			flex-wrap: wrap;
+		}
+	}
 	h2 {
-		font: 700 15px/1.2 var(--sans);
+		font: 700 18px/1.2 var(--sans);
 		margin: 0;
 	}
 	p {

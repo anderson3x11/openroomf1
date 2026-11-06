@@ -6,7 +6,7 @@
 	const points = $derived(circuit.path.map(([x, y]) => `${x},${y}`).join(' '));
 </script>
 
-<svg viewBox="0 0 {circuit.w} {circuit.h}" role="img" aria-label={label}>
+<svg viewBox="0 0 {circuit.w} {circuit.h}" preserveAspectRatio="xMaxYMid meet" role="img" aria-label={label}>
 	<polygon {points} />
 </svg>
 
@@ -19,8 +19,8 @@
 	polygon {
 		fill: none;
 		stroke: currentcolor;
-		stroke-width: 10;
+		stroke-width: 4px;
 		stroke-linejoin: round;
-		opacity: 0.9;
+		vector-effect: non-scaling-stroke;
 	}
 </style>

@@ -4,7 +4,6 @@
 	import { heatmapOption } from '#lib/charts/heatmap.ts';
 	import { raceTraceOption } from '#lib/charts/racetrace.ts';
 	import { laptimesOption } from '#lib/charts/laptimes.ts';
-	import DriverPicker from '#lib/components/DriverPicker.svelte';
 	import Panel from '#lib/components/Panel.svelte';
 	import SpeedsTable from '#lib/components/SpeedsTable.svelte';
 	import { filterLapTimes, filterResults, withLapRange } from '#lib/filters.ts';
@@ -18,10 +17,6 @@
 	const laptimes = $derived(filterLapTimes(data.laptimes, data.strategy, race.filters));
 	// '' = gap to the leader of each lap, else gap to this driver (undercuts, pit windows).
 	let ref = $state('');
-	// Drivers hidden on each line chart only, on top of the global filters.
-	let hiddenTrace = $state(new Set<string>());
-	let hiddenGaps = $state(new Set<string>());
-	const shown = (hidden: Set<string>) => results.filter((r) => !hidden.has(r.drv));
 </script>
 
 <div class="panels">
@@ -30,13 +25,12 @@
 		desc="Time gained (+) or lost (-) against a typical car that laps, every lap, in the median lap time of the field. Rising: faster than the field, falling: slower, sharp drops: pit stops. Rain and safety cars slow the reference down too. Mouse wheel or right slider to zoom."
 		wide
 	>
-		<DriverPicker {results} logos={race.logos} bind:hidden={hiddenTrace} />
 		<Chart
 			option={withLapRange(
-				raceTraceOption(data.raceTrace, shown(hiddenTrace), race.logos, data.events, data.results),
+				raceTraceOption(data.raceTrace, results, race.logos, data.events, data.results),
 				race.filters.laps
 			)}
-			height={560}
+			height={680}
 		/>
 	</Panel>
 
@@ -58,13 +52,12 @@
 				</select>
 			</label>
 		{/snippet}
-		<DriverPicker {results} logos={race.logos} bind:hidden={hiddenGaps} />
 		<Chart
 			option={withLapRange(
-				gapsOption(data.gaps, shown(hiddenGaps), race.logos, data.events, ref, data.results),
+				gapsOption(data.gaps, results, race.logos, data.events, ref, data.results),
 				race.filters.laps
 			)}
-			height={600}
+			height={680}
 		/>
 	</Panel>
 
@@ -75,7 +68,7 @@
 	>
 		<Chart
 			option={heatmapOption(data.lapMatrix, results, race.logos, race.filters.laps)}
-			height={results.length * 24 + 80}
+			height={results.length * 30 + 80}
 		/>
 	</Panel>
 
@@ -86,7 +79,7 @@
 	>
 		<Chart
 			option={laptimesOption(laptimes, data.results, race.logos)}
-			height={Object.keys(laptimes).length * 26 + 48}
+			height={Object.keys(laptimes).length * 32 + 48}
 		/>
 	</Panel>
 

@@ -58,7 +58,7 @@
 <style>
 	.tiles {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: var(--gap);
 		margin: 0 0 var(--gap);
 	}
@@ -103,10 +103,22 @@
 	}
 	.value {
 		margin-left: auto;
+		padding-left: 12px;
+		font: 700 24px/1.1 var(--mono); /* the display font has no real colon for lap times */
 		color: var(--ink);
 	}
 	.sub {
 		font: 13px var(--mono);
 		color: var(--ink-muted);
+	}
+	@media (min-width: 1500px) {
+		.tiles {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 700px) {
+		.tiles {
+			grid-template-columns: minmax(0, 1fr);
+		}
 	}
 </style>

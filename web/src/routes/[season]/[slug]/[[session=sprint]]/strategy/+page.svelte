@@ -41,27 +41,45 @@
 		<PitStopsTable stops={pitstops} results={data.results} logos={race.logos} />
 	</Panel>
 
-	<Panel
-		title="Tyre degradation"
-		desc="Lap time lost per lap of tyre age, one dot per stint, corrected for fuel burn (0.03 s per lap). Clean laps only: no pit laps, no SC or VSC, not the first two laps of the stint."
-	>
-		<Chart
-			option={degradationOption(
-				data.degradation.filter((s) => race.filters.compounds.has(s.cmp)),
-				results,
-				race.logos
-			)}
-			height={Math.max(160, new Set(data.degradation.map((s) => s.drv)).size * 24 + 48)}
-		/>
-	</Panel>
-
-	{#if data.weather}
+	<div class="side">
 		<Panel
-			title="Weather"
-			desc="Track and air temperature through the race. Blue bands: rain. Hover for humidity and wind."
+			title="Tyre degradation"
+			desc="Lap time lost per lap of tyre age, one dot per stint, corrected for fuel burn (0.03 s per lap). Clean laps only: no pit laps, no SC or VSC, not the first two laps of the stint."
 		>
-			<Chart option={withLapRange(weatherOption(data.weather, data.positions.laps), race.filters.laps)} height={320} />
+			<Chart
+				option={degradationOption(
+					data.degradation.filter((s) => race.filters.compounds.has(s.cmp)),
+					results,
+					race.logos
+				)}
+				height={Math.max(160, new Set(data.degradation.map((s) => s.drv)).size * 30 + 48)}
+			/>
 		</Panel>
-	{/if}
+
+		{#if data.weather}
+			<Panel
+				title="Weather"
+				desc="Track and air temperature through the race. Blue bands: rain. Hover for humidity and wind."
+			>
+				<Chart option={withLapRange(weatherOption(data.weather, data.positions.laps), race.filters.laps)} height={380} />
+			</Panel>
+		{/if}
+	</div>
 </div>
+
+<style>
+	.side {
+		display: grid;
+		gap: var(--gap);
+		min-width: 0;
+		align-content: start;
+	}
+	@media (min-width: 1401px) {
+		.side {
+			position: sticky;
+			top: 66px;
+			align-self: start;
+		}
+	}
+</style>
 
