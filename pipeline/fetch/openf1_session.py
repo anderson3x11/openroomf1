@@ -463,6 +463,8 @@ def results_frame(
         rank = o["position"] if o else r.get("position")
         if o:
             cls, grid, status, points = o["positionText"], o["grid"], o["status"], o["points"]
+            # Jolpica can publish a result before its grid (Brazil 2026): -1 or empty, unknown.
+            grid = grid if pd.notna(grid) and grid > 0 else np.nan
         else:
             flag = "D" if r.get("dsq") else "W" if r.get("dns") else "R" if r.get("dnf") else None
             cls = flag or (str(r["position"]) if r.get("position") else "N")
