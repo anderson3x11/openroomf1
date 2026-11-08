@@ -191,6 +191,15 @@ def test_standings_driver_without_position(standings):
     assert (nor["drv"], nor["pos"], nor["prev"]) == ("NOR", None, None)
 
 
+def test_standings_driver_without_code(standings):
+    # Brazil 2026: Jolpica gives no code for Rafael Camara.
+    drivers = standings["drivers_now"]
+    drivers["familyName"] = "Pérez"
+    drivers.loc[2, "driverCode"] = None
+    out = compute_standings(**standings, results=[])
+    assert "PER" in [d["drv"] for d in out["drivers"]]
+
+
 def test_standings_first_round_has_no_previous(standings):
     empty = {k: v.iloc[0:0] if k.endswith("prev") else v for k, v in standings.items()}
     out = compute_standings(**empty, results=[])

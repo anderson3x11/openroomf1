@@ -143,6 +143,13 @@ def test_lap_skipped_by_openf1_comes_back_empty():
     assert df.loc[3, "Position"] == 2
 
 
+def test_lap_nobody_completes_is_dropped():
+    # Brazil 2026: OpenF1 opened lap 72 for the winner, his cool-down lap after the flag.
+    laps = [lap(1, 0, 90), lap(2, 90, 90), lap(3, 180, None)]
+    df = laps_frame(laps, DRIVERS, [], [], [], messages_frame([]), T0)
+    assert list(df["LapNumber"]) == [1, 2]
+
+
 def test_qualifying_parts():
     laps = pd.DataFrame({"Time": pd.to_timedelta([100, 1200, 1300, 2500], unit="s")})
     messages = messages_frame(

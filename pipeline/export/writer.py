@@ -13,7 +13,10 @@ def slugify(text: str) -> str:
 
 def write_json(path: Path, obj) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
+    path.write_text(
+        json.dumps(obj, separators=(",", ":"), ensure_ascii=False, allow_nan=False),
+        encoding="utf-8",
+    )
 
 
 def dir_size(path: Path) -> int:

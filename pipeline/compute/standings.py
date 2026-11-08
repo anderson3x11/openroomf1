@@ -24,6 +24,20 @@ def _diff(now: pd.DataFrame, prev: pd.DataFrame, key: str) -> list[tuple]:
     return rows
 
 
+def _with_codes(drivers: pd.DataFrame) -> pd.DataFrame:
+    """Jolpica has no code for some newcomers (Camara, Brazil 2026): the first three letters
+    of the family name, as F1 does."""
+    if drivers["driverCode"].notna().all():
+        return drivers
+    guess = (
+        drivers["familyName"]
+        .str.normalize("NFKD")
+        .str.encode("ascii", "ignore")
+        .str.decode("ascii")
+    )
+    return drivers.assign(driverCode=drivers["driverCode"].fillna(guess.str[:3].str.upper()))
+
+
 def compute_standings(
     drivers_now: pd.DataFrame,
     drivers_prev: pd.DataFrame,
@@ -32,6 +46,7 @@ def compute_standings(
     results: list[dict],
 ) -> dict:
     """Previous-round frames are empty after round 1. results is the compute_results output."""
+    drivers_now, drivers_prev = _with_codes(drivers_now), _with_codes(drivers_prev)
     # Jolpica constructor names differ from FastF1 team names ("RB F1 Team" vs "Racing Bulls"):
     # map each constructor to the FastF1 team of its drivers, so names and logos match the race.
     # Only drivers who stayed in one team are used: a mid-season switch lists both constructors.

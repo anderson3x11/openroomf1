@@ -6,7 +6,7 @@ Four requests per run, well under the 4 req/s and 500 req/h limits.
 import pandas as pd
 from fastf1.ergast import Ergast
 
-DRIVER_COLS = ["position", "points", "driverCode", "constructorNames"]
+DRIVER_COLS = ["position", "points", "driverCode", "familyName", "constructorNames"]
 TEAM_COLS = ["position", "points", "constructorName"]
 
 

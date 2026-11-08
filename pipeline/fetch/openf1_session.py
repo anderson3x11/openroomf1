@@ -111,6 +111,9 @@ def laps_frame(
     duration = seconds(df["lap_duration"])
     next_start = start.groupby(df["driver_number"]).shift(-1)
     end = next_start.where(next_start.notna(), start + duration)
+    # OpenF1 can open a lap that no car completes, like the winner's cool-down lap (Brazil 2026).
+    within = df["lap_number"] <= df.loc[end.notna(), "lap_number"].max()
+    df, start, duration, end = df[within], start[within], duration[within], end[within]
     out = pd.DataFrame(
         {
             "Driver": df["driver_number"].map(lambda n: drivers[n]["name_acronym"]),
